@@ -11,6 +11,11 @@ log.recipes.enable: true
 
 ############## MAGIC DOOR SETTINGS ############
 magic.doors.recipe.name.root.door: root-door
+magic.doors.recipe.name.door.copy: root-door-copy
+magic.doors.recipe.name.door.key: door-key
+
+  
+
 
 
 
@@ -18,10 +23,8 @@ magic.doors.recipe.name.root.door: root-door
 ############## RECIPES ############
 recipes:
   - root-door
-  - west-portal
-  - east-portal
-  - east-key
-  - west-key
+  - root-door-copy
+  - door-key
 
 
 ###############################################
@@ -31,7 +34,7 @@ recipes:
 
 ################## BEGIN Root Door ############
 recipe.root-door.name: √Root
-recipe.root-door.rows:
+recipe.root-door.rows: 
   - DDD
   - DID
   - DDD
@@ -43,90 +46,391 @@ recipe.root-door.output: IRON_DOOR
 recipe.root-door.listeners: 
   - com.blocktyper.magicdoors.RootDoorListener
 
-################## BEGIN WEST PORTAL #################
-recipe.west-portal.name: ^WestPortal
-recipe.west-portal.rows: 
-  - AAA
-  - EDA
-  - AAA
-recipe.west-portal.mats: 
-  - A=AIR
+################## BEGIN ROOT DOOR COPY #################
+recipe.root-door-copy.name: ^RootDoorCopy
+recipe.root-door-copy.rows: 
+  - OEO
+  - ODO
+  - OWO
+recipe.root-door-copy.mats: 
   - E=EMERALD
+  - O=OBSIDIAN
+  - W=WATER_BUCKET
   - D=IRON_DOOR
-recipe.west-portal.output: IRON_DOOR
-recipe.west-portal.item.starts.with:
+recipe.root-door-copy.output: IRON_DOOR
+recipe.root-door-copy.item.starts.with: 
   - 4=√Root
-recipe.west-portal.keep:
-  - YYY
-  - YYY
-  - YYY
+recipe.root-door-copy.keep: 
+  - NYN
+  - NYN
+  - NNN
 
-################## END WEST PORTAL #################
+################## END ROOT DOOR COPY #################
 
 
 
-############ BEGIN EAST PORTAL ##########
-recipe.east-portal.name: ^EastPortal
-recipe.east-portal.rows: 
-  - AAA
-  - ADE
-  - AAA
-recipe.east-portal.mats: 
+
+############ BEGIN Door Key ##########
+recipe.door-key.name: ^DoorKey
+recipe.door-key.rows: 
+  - AYA
+  - ADA
+  - ALA
+recipe.door-key.mats: 
+  - Y=YELLOW_FLOWER
   - A=AIR
-  - E=EMERALD
   - D=IRON_DOOR
-recipe.east-portal.output: IRON_DOOR
-recipe.east-portal.item.starts.with:
-  - 4=√Root
-recipe.east-portal.keep:
-  - YYY
-  - YYY
-  - YYY
-
-############ BEGIN EAST PORTAL ##########
-
-
-############ BEGIN East Key ##########
-recipe.east-key.name: ^EastKey
-recipe.east-key.rows: 
-  - AFA
-  - AEA
-  - AAA
-recipe.east-key.mats: 
-  - F=YELLOW_FLOWER
-  - A=AIR
-  - E=IRON_DOOR
-recipe.east-key.item.starts.with:
-  - 4=^EastPortal
-recipe.east-key.output: YELLOW_FLOWER
-recipe.east-key.item.starts.with: []
-recipe.east-key.keep:
+  - L=LAVA_BUCKET
+recipe.door-key.item.starts.with: 
+  - 4=^RootDoorCopy
+recipe.door-key.output: YELLOW_FLOWER
+recipe.door-key.item.starts.with: []
+recipe.door-key.keep: 
   - NNN
   - NYN
   - NNN
-############ END East Key ##########
+############ END Door Key ##########
 
 
-############ BEGIN West Key ##########
-recipe.west-key.name: ^WestKey
-recipe.west-key.rows: 
-  - AMA
-  - AWA
-  - AAA
-recipe.west-key.mats: 
-  - M=RED_MUSHROOM
-  - A=AIR
-  - W=IRON_DOOR
-recipe.west-key.item.starts.with:
-  - 4=^WestPortal
-recipe.west-key.output: RED_MUSHROOM
-recipe.west-key.item.starts.with: []
-recipe.west-key.keep:
-  - NNN
-  - NYN
-  - NNN
-############ END west-portal Key ##########
 
+
+
+
+
+
+
+
+magic.doors.door.name.prefixes: 
+  - addicting
+  - afraid
+  - agreeable
+  - amused
+  - ancient
+  - angry
+  - annoyed
+  - anxious
+  - arrogant
+  - ashamed
+  - average
+  - awful
+  - bad
+  - beautiful
+  - better
+  - big
+  - bitter
+  - black
+  - blue
+  - boiling
+  - brave
+  - breezy
+  - brief
+  - bright
+  - broad
+  - broken
+  - bumpy
+  - calm
+  - careful
+  - charming
+  - cheerful
+  - chilly
+  - clumsy
+  - cold
+  - colossal
+  - combative
+  - comfortable
+  - confused
+  - cooing
+  - cool
+  - cooperative
+  - courageous
+  - crazy
+  - creepy
+  - cruel
+  - cuddly
+  - curly
+  - curved
+  - damp
+  - dangerous
+  - deafening
+  - deep
+  - delightful
+  - depressed
+  - determined
+  - dirty
+  - disgusted
+  - disturbed
+  - dizzy
+  - dry
+  - dull
+  - dusty
+  - eager
+  - early
+  - elated
+  - embarrassed
+  - empty
+  - encouraging
+  - energetic
+  - enthusiastic
+  - envious
+  - evil
+  - excited
+  - exuberant
+  - faint
+  - fair
+  - faithful
+  - fantastic
+  - fast
+  - fat
+  - few
+  - fierce
+  - filthy
+  - fine
+  - flaky
+  - flat
+  - fluffy
+  - foolish
+  - forlorn
+  - frail
+  - frantic
+  - fresh
+  - friendly
+  - frightened
+  - funny
+  - fuzzy
+  - gentle
+  - giant
+  - gigantic
+  - good
+  - gorgeous
+  - greasy
+  - great
+  - green
+  - grieving
+  - grubby
+  - grumpy
+  - handsome
+  - happy
+  - hard
+  - harsh
+  - healthy
+  - heavy
+  - helpful
+  - helpless
+  - high
+  - hilarious
+  - hissing
+  - hollow
+  - homeless
+  - horrible
+  - hot
+  - huge
+  - hungry
+  - hurt
+  - hushed
+  - husky
+  - icy
+  - ill
+  - immense
+  - itchy
+  - jealous
+  - jittery
+  - jolly
+  - juicy
+  - kind
+  - large
+  - late
+  - lazy
+  - light
+  - little
+  - lively
+  - lonely
+  - long
+  - loose
+  - loud
+  - lovely
+  - low
+  - lucky
+  - magnificent
+  - mammoth
+  - many
+  - massive
+  - melodic
+  - melted
+  - mighty
+  - miniature
+  - moaning
+  - modern
+  - mute
+  - mysterious
+  - narrow
+  - nasty
+  - naughty
+  - nervous
+  - new
+  - nice
+  - nosy
+  - numerous
+  - nutty
+  - obedient
+  - obnoxious
+  - odd
+  - old
+  - orange
+  - ordinary
+  - outrageous
+  - panicky
+  - perfect
+  - petite
+  - plastic
+  - pleasant
+  - precious
+  - pretty
+  - prickly
+  - proud
+  - puny
+  - purple
+  - purring
+  - quaint
+  - quick
+  - quickest
+  - quiet
+  - rainy
+  - rapid
+  - rare
+  - raspy
+  - ratty
+  - red
+  - relieved
+  - repulsive
+  - resonant
+  - ripe
+  - roasted
+  - robust
+  - rotten
+  - rough
+  - round
+  - sad
+  - salty
+  - scary
+  - scattered
+  - scrawny
+  - screeching
+  - selfish
+  - shaggy
+  - shaky
+  - shallow
+  - sharp
+  - shivering
+  - short
+  - shrill
+  - silent
+  - silky
+  - silly
+  - skinny
+  - slimy
+  - slippery
+  - slow
+  - small
+  - smart
+  - smiling
+  - smooth
+  - soft
+  - solid
+  - sore
+  - sour
+  - spicy
+  - splendid
+  - spotty
+  - square
+  - squealing
+  - stale
+  - steady
+  - steep
+  - sticky
+  - stingy
+  - straight
+  - strange
+  - striped
+  - strong
+  - stupendous
+  - successful
+  - sweet
+  - swift
+  - tall
+  - tame
+  - tan
+  - tart
+  - tasteless
+  - tasty
+  - tender
+  - tender
+  - tense
+  - terrible
+  - testy
+  - thirsty
+  - thoughtful
+  - thoughtless
+  - thundering
+  - tight
+  - tiny
+  - tired
+  - tough
+  - tricky
+  - troubled
+  - ugliest
+  - ugly
+  - uneven
+  - upset
+  - uptight
+  - vast
+  - victorious
+  - vivacious
+  - voiceless
+  - wasteful
+  - watery
+  - weak
+  - weary
+  - wet
+  - whispering
+  - wicked
+  - wide
+  - wide-eyed
+  - witty
+  - wonderful
+  - wooden
+  - worried
+  - x-ray
+  - yellow
+  - young
+  - yummy
+  - zany
+
+magic.doors.door.name.suffixes: 
+  - potter
+  - snake
+  - wizard
+  - magi
+  - noble
+  - nightly
+  - turing
+  - asimov
+  - heinlin
+  - martin
+  - rowling
+  - tolkien
+  - gaiman
+  - piccard
+  - riker
+  - atwood
+  - vonnegut
+  - palinuk
+  - sidharth
+  - dragon
+  - donkey
+  - lannister
+  - stark
+  - steve
+  - alex
 
 
 
