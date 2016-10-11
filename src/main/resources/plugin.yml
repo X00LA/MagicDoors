@@ -5,3 +5,6 @@ author: spaarkimus
 website: blocktyper.com
 database: false
 description: These doors are magic.
+commands:
+  md-equip:
+    description: Gives OP stuff to test magic doors!

@@ -1,5 +1,6 @@
 package com.blocktyper.magicdoors;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,16 +23,22 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import com.blocktyper.magicdoors.data.DimentionItemCount;
+import com.blocktyper.magicdoors.data.MagicDoor;
+import com.blocktyper.magicdoors.data.MagicDoorRepo;
 import com.blocktyper.plugin.BlockTyperPlugin;
 import com.blocktyper.recipes.IRecipe;
 
 
+/*
+ * magic.doors.door=Magische Tür
+magic.doors.key=Magie Türschlüssel
+block.typer.loading.recipes=Laden Rezepte
+ */
+
 
 public class RootDoorListener implements Listener {
 
-	public static String RECIPE_NAME_ROOT_DOOR = "magic.doors.recipe.name.root.door";
-	public static String RECIPE_NAME_ROOT_DOOR_COPY = "magic.doors.recipe.name.door.copy";
-	public static String RECIPE_NAME_DOOR_KEY = "magic.doors.recipe.name.door.key";
+	
 	
 	public static String DOOR_NAME_PREFIXES = "magic.doors.door.name.prefixes";
 	public static String DOOR_NAME_SUFFIXES = "magic.doors.door.name.suffixes";
@@ -51,25 +58,27 @@ public class RootDoorListener implements Listener {
 	private IRecipe rootDoorCopyRecipe;
 	private IRecipe doorKeyRecipe;
 	
+	private static MagicDoorRepo magicDoorRepo;
+	private static DimentionItemCount dimentionItemCount;
 	
 
 	public IRecipe getRootDoorRecipe() {
 		if(rootDoorRecipe == null){
-			rootDoorRecipe = getRecipeFromKey(RECIPE_NAME_ROOT_DOOR);
+			rootDoorRecipe = getRecipeFromKey(MagicDoorsPlugin.RECIPE_NAME_ROOT_DOOR);
 		}
 		return rootDoorRecipe;
 	}
 
 	public IRecipe getRootDoorCopyRecipe() {
 		if(rootDoorCopyRecipe == null){
-			rootDoorCopyRecipe = getRecipeFromKey(RECIPE_NAME_ROOT_DOOR_COPY);
+			rootDoorCopyRecipe = getRecipeFromKey(MagicDoorsPlugin.RECIPE_NAME_ROOT_DOOR_COPY);
 		}
 		return rootDoorCopyRecipe;
 	}
 
 	public IRecipe getDoorKeyRecipe() {
 		if(doorKeyRecipe == null){
-			doorKeyRecipe = getRecipeFromKey(RECIPE_NAME_DOOR_KEY);
+			doorKeyRecipe = getRecipeFromKey(MagicDoorsPlugin.RECIPE_NAME_DOOR_KEY);
 		}
 		return doorKeyRecipe;
 	}
@@ -91,159 +100,137 @@ public class RootDoorListener implements Listener {
 		
 		doorPrefixes = plugin.getConfig().getStringList(DOOR_NAME_PREFIXES);
 		doorSuffixes = plugin.getConfig().getStringList(DOOR_NAME_SUFFIXES);
+		
+		initMagicDoorRepo();
+		initDimentionItemCount();
 	}
 
 	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = false)
 	public void entityShootBow(EntityShootBowEvent event) {
 		plugin.debugInfo("EntityShootBowEvent");
 	}
+	
+	
 
 	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = false)
 	public void onBlockPlace(BlockPlaceEvent event) {
-		plugin.debugInfo("BlockPlaceEvent - Material " + event.getBlock().getType().name());
+		try{
+			plugin.debugInfo("BlockPlaceEvent - Material " + event.getBlock().getType().name());
 
-		if (getRootDoorRecipe() == null) {
-			plugin.debugWarning("No magic door recipe.");
-			return;
-		}
-
-		if (getRootDoorCopyRecipe() == null) {
-			plugin.debugWarning("No magic door copy recipe.");
-			return;
-		}
-
-		ItemStack itemInHand = event.getItemInHand();
-
-		if (itemInHand == null) {
-			plugin.debugWarning("Not holding an item");
-			return;
-		}
-
-		if (!itemInHand.getType().equals(getRootDoorRecipe().getOutput()) && !itemInHand.getType().equals(getRootDoorCopyRecipe().getOutput())) {
-			plugin.debugWarning(
-					"Not holding a magic door");
-			return;
-		}
-
-		if (itemInHand.getItemMeta() == null || itemInHand.getItemMeta().getDisplayName() == null) {
-			plugin.debugWarning("Not holding door with a name.");
-			return;
-		}
-
-		String itemName = itemInHand.getItemMeta().getDisplayName();
-
-		if (!itemName.equals(getRootDoorRecipe().getName()) && !itemName.startsWith((getRootDoorCopyRecipe().getName()))) {
-			plugin.debugWarning("Not holding door with the magic door name: '" + itemName + "' != '"
-					+ getRootDoorRecipe().getName() + "'");
-			plugin.debugWarning("Not holding door with the magic door name: '" + itemName + "' != '"
-					+ getRootDoorCopyRecipe().getName() + "'");
-			return;
-		}
-		
-		
-		MagicDoorRepo magicDoorRepo = plugin.getTypeData(DATA_KEY_MAGIC_DOORS, MagicDoorRepo.class);
-		
-		if(magicDoorRepo == null)
-			magicDoorRepo = new MagicDoorRepo();
-		
-		if(magicDoorRepo.map == null)
-			magicDoorRepo.map = new HashMap<String, RootDoorListener.MagicDoor>();
-
-		
-		
-		String doorId = null;
-		
-		
-		if(itemName.equals(getRootDoorRecipe().getName())){
-			//root door gets cool name from configured prefixes and suffixes
-			doorId = getNewDoorId();
-			
-			if(doorId != null && magicDoorRepo.map.containsKey(doorId)){
-				//clash
-				doorId = solveClash(doorId, magicDoorRepo, 1);
-			}
-		}
-		
-		if(doorId == null){
-			UUID uuid = UUID.randomUUID();
-			doorId = uuid.toString();
-		}
-
-		event.getPlayer().sendMessage(ChatColor.GREEN + " you placed a magic door. ID: " + doorId);
-
-		DimentionItemCount itemCountPerDimention = plugin.getTypeData(DATA_KEY_MAGIC_DOOR_DIMENTION_MAP,
-				DimentionItemCount.class);
-		if (itemCountPerDimention == null) {
-			itemCountPerDimention = new DimentionItemCount();
-			itemCountPerDimention.setItemsInDimentionAtValue(new HashMap<String, Map<Integer, Set<String>>>());
-		}
-
-		List<String> dimentions = new ArrayList<String>();
-		dimentions.add("x");
-		dimentions.add("y");
-		dimentions.add("z");
-
-		for (String dimention : dimentions) {
-			if (itemCountPerDimention.getItemsInDimentionAtValue().get(dimention) == null) {
-				itemCountPerDimention.getItemsInDimentionAtValue().put(dimention, new HashMap<Integer, Set<String>>());
-			}
-
-			int value = dimention.equals("x") ? event.getBlock().getX()
-					: (dimention.equals("y") ? event.getBlock().getY() : event.getBlock().getZ());
-
-			if (itemCountPerDimention.getItemsInDimentionAtValue().get(dimention).get(value) == null) {
-				itemCountPerDimention.getItemsInDimentionAtValue().get(dimention).put(value, new HashSet<String>());
-			}
-			itemCountPerDimention.getItemsInDimentionAtValue().get(dimention).get(value).add(doorId);
-		}
-
-		MagicDoor doorToMake = new MagicDoor();
-		doorToMake.id = doorId;
-		doorToMake.world = event.getPlayer().getWorld().getName();
-
-		if (itemName.startsWith(getRootDoorCopyRecipe().getName())) {
-			String parentId = null;
-
-			String displayName = itemInHand.getItemMeta().getDisplayName();
-			if (displayName != null && displayName.contains(PARENT_ID_EQUALS)) {
-				parentId = displayName.substring(displayName.indexOf(PARENT_ID_EQUALS) + PARENT_ID_EQUALS.length());
-			}
-
-			MagicDoor parentDoor = parentId != null ? magicDoorRepo.map.get(parentId) : null;
-
-			if (parentDoor == null) {
-				event.getPlayer().sendMessage(ChatColor.RED + "You have attempted to place an an orphan door");
-				event.setCancelled(true);
+			//if there is no root door recipe defined, do not continue
+			if (getRootDoorRecipe() == null) {
+				plugin.debugWarning("No magic door recipe.");
 				return;
-			} else {
-				if (parentDoor.children == null)
-					parentDoor.children = new HashMap<Integer, String>();
-
-				parentDoor.children.put(parentDoor.children.size(), doorId);
-				doorToMake.parentId = parentDoor.id;
-
-				magicDoorRepo.map.put(parentId, parentDoor);
 			}
 
-		} else {
-			doorToMake.parentId = null;
+			//if there is no root door copy recipe defined, do not continue
+			if (getRootDoorCopyRecipe() == null) {
+				plugin.debugWarning("No magic door copy recipe.");
+				return;
+			}
+
+			ItemStack itemInHand = event.getItemInHand();
+
+			//if player is not holding a item, do not continue
+			if (itemInHand == null) {
+				plugin.debugWarning("Not holding an item");
+				return;
+			}
+
+			//if player is not holding a magic door, do not continue
+			if (!itemInHand.getType().equals(getRootDoorRecipe().getOutput()) && !itemInHand.getType().equals(getRootDoorCopyRecipe().getOutput())) {
+				plugin.debugWarning(
+						"Not holding a magic door");
+				return;
+			}
+
+			//if the item does not have a display name, do not continue
+			if (itemInHand.getItemMeta() == null || itemInHand.getItemMeta().getDisplayName() == null) {
+				plugin.debugWarning("Not holding door with a name.");
+				return;
+			}
+
+			String itemName = itemInHand.getItemMeta().getDisplayName();
+
+			//if the item name does not equal the name of the current Root Door or Root Door Copy, do not continue
+			if (!itemName.equals(getRootDoorRecipe().getName()) && !itemName.startsWith((getRootDoorCopyRecipe().getName()))) {
+				plugin.debugWarning("Not holding door with the magic door name: '" + itemName + "' != '"
+						+ getRootDoorRecipe().getName() + "'");
+				plugin.debugWarning("Not holding door with the magic door name: '" + itemName + "' != '"
+						+ getRootDoorCopyRecipe().getName() + "'");
+				return;
+			}
+					
+			
+			
+			String doorId = null;
+			if(itemName.equals(getRootDoorRecipe().getName())){
+				//if this is a root door
+				//look up a cool name from configured prefixes and suffixes
+				doorId = getNewDoorId();
+				
+				if(doorId != null && magicDoorRepo.getMap().containsKey(doorId)){
+					//clash
+					doorId = solveClash(doorId, magicDoorRepo, 1);
+				}
+			}
+			
+			//if we failed to get an ID at this point, just make a UUID
+			if(doorId == null){
+				UUID uuid = UUID.randomUUID();
+				doorId = uuid.toString();
+			}
+	
+
+			//construct the door data
+			MagicDoor doorToMake = new MagicDoor();
+			doorToMake.setId(doorId);
+			doorToMake.setWorld(event.getPlayer().getWorld().getName());
+
+			if (itemName.startsWith(getRootDoorCopyRecipe().getName())) {
+				String parentId = null;
+
+				String displayName = itemInHand.getItemMeta().getDisplayName();
+				if (displayName != null && displayName.contains(PARENT_ID_EQUALS)) {
+					parentId = displayName.substring(displayName.indexOf(PARENT_ID_EQUALS) + PARENT_ID_EQUALS.length());
+				}
+
+				MagicDoor parentDoor = parentId != null ? magicDoorRepo.getMap().get(parentId) : null;
+
+				if (parentDoor == null) {
+					event.getPlayer().sendMessage(ChatColor.RED + plugin.getLocalizedMessage("magic.doors.attempted.to.place.orphan.door"));
+					event.setCancelled(true);
+					return;
+				} else {
+					if (parentDoor.getChildren() == null)
+						parentDoor.setChildren(new HashMap<Integer, String>());
+
+					parentDoor.getChildren().put(parentDoor.getChildren().size(), doorId);
+					doorToMake.setParentId(parentDoor.getId());
+
+					magicDoorRepo.getMap().put(parentId, parentDoor);
+				}
+
+			} else {
+				doorToMake.setParentId(null);
+			}
+
+			doorToMake.setX(event.getBlock().getX());
+			doorToMake.setY(event.getBlock().getY());
+			doorToMake.setZ(event.getBlock().getZ());
+
+			doorToMake.setPlayerX(event.getPlayer().getLocation().getBlockX());
+			doorToMake.setPlayerY(event.getPlayer().getLocation().getBlockY());
+			doorToMake.setPlayerZ(event.getPlayer().getLocation().getBlockZ());
+			
+			addDoor(doorToMake);
+
+
+			event.getPlayer().sendMessage(ChatColor.GREEN + String.format(plugin.getLocalizedMessage("magic.doors.you.placed.a.magic.door"), doorId));
+		}catch(Exception e){
+			plugin.warning("Unexpected error in 'RootDoorListener.onBlockPlace'. Message: " + e.getMessage());
 		}
-
-		doorToMake.x = event.getBlock().getX();
-		doorToMake.y = event.getBlock().getX();
-		doorToMake.z = event.getBlock().getX();
-
-		doorToMake.playerX = event.getPlayer().getLocation().getBlockX();
-		doorToMake.playerY = event.getPlayer().getLocation().getBlockY();
-		doorToMake.playerZ = event.getPlayer().getLocation().getBlockZ();
-
-		magicDoorRepo.map.put(doorId, doorToMake);
-
-		plugin.setData(DATA_KEY_MAGIC_DOORS, magicDoorRepo);
-		plugin.setData(DATA_KEY_MAGIC_DOOR_DIMENTION_MAP, itemCountPerDimention, true);
-
-		event.getPlayer().sendMessage(ChatColor.GREEN + " you placed a magic door. ID: " + doorId);
-
+		
 	}
 
 	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = false)
@@ -280,28 +267,23 @@ public class RootDoorListener implements Listener {
 			plugin.debugInfo("Not a magic door related object in hand");
 			return;
 		}
+		
+		initDimentionItemCount();
 
-		DimentionItemCount itemCountPerDimention = plugin.getTypeData(DATA_KEY_MAGIC_DOOR_DIMENTION_MAP,
-				DimentionItemCount.class);
-
-		if (itemCountPerDimention == null || itemCountPerDimention.getItemsInDimentionAtValue() == null
-				|| itemCountPerDimention.getItemsInDimentionAtValue().isEmpty()) {
+		if (dimentionItemCount == null || dimentionItemCount.getItemsInDimentionAtValue() == null
+				|| dimentionItemCount.getItemsInDimentionAtValue().isEmpty()) {
 			plugin.debugInfo("no dimention values recorded");
 			return;
 		}
 
-		List<String> dimentions = new ArrayList<String>();
-		dimentions.add("x");
-		dimentions.add("y");
-		dimentions.add("z");
 
 		Map<String, Set<String>> matchesMap = new HashMap<String, Set<String>>();
 
 		String lastDimention = null;
-		for (String dimention : dimentions) {
-			if (!itemCountPerDimention.getItemsInDimentionAtValue().containsKey(dimention)
-					|| itemCountPerDimention.getItemsInDimentionAtValue().get(dimention) == null
-					|| itemCountPerDimention.getItemsInDimentionAtValue().get(dimention).isEmpty()) {
+		for (String dimention : getDimentionList()) {
+			if (!dimentionItemCount.getItemsInDimentionAtValue().containsKey(dimention)
+					|| dimentionItemCount.getItemsInDimentionAtValue().get(dimention) == null
+					|| dimentionItemCount.getItemsInDimentionAtValue().get(dimention).isEmpty()) {
 				plugin.debugInfo("no " + dimention + " values recorded");
 				return;
 			}
@@ -309,15 +291,15 @@ public class RootDoorListener implements Listener {
 			int coordValue = dimention.equals("x") ? event.getBlock().getX()
 					: (dimention.equals("y") ? event.getBlock().getY() : event.getBlock().getZ());
 
-			if (!itemCountPerDimention.getItemsInDimentionAtValue().get(dimention).containsKey(coordValue)
-					|| itemCountPerDimention.getItemsInDimentionAtValue().get(dimention).get(coordValue).isEmpty()) {
+			if (!dimentionItemCount.getItemsInDimentionAtValue().get(dimention).containsKey(coordValue)
+					|| dimentionItemCount.getItemsInDimentionAtValue().get(dimention).get(coordValue).isEmpty()) {
 				plugin.debugInfo("no matching " + dimention + " value");
 				return;
 			} else {
 
 				Set<String> newMatchesList = new HashSet<String>();
 				if (lastDimention == null || matchesMap.containsKey(lastDimention)) {
-					for (String uuid : itemCountPerDimention.getItemsInDimentionAtValue().get(dimention).get(coordValue)) {
+					for (String uuid : dimentionItemCount.getItemsInDimentionAtValue().get(dimention).get(coordValue)) {
 						if (lastDimention == null || matchesMap.get(lastDimention).contains(uuid)) {
 							newMatchesList.add(uuid);
 						}
@@ -346,99 +328,176 @@ public class RootDoorListener implements Listener {
 		}
 
 		String match = exactMatches.get(index);
-
-		MagicDoorRepo magicDoorRepo = plugin.getTypeData(DATA_KEY_MAGIC_DOORS, MagicDoorRepo.class);
+		
+		initMagicDoorRepo();
 
 		if (magicDoorRepo == null) {
 			plugin.debugWarning("Failed to load magic-doors repo.");
 			return;
 		}
 
-		if (!magicDoorRepo.map.containsKey(match)) {
+		if (!magicDoorRepo.getMap().containsKey(match)) {
 			plugin.debugWarning("Failed to load door from magic-doors repo.");
 			return;
 		}
 
-		MagicDoor magicDoor = magicDoorRepo.map.get(match);
+		MagicDoor magicDoor = magicDoorRepo.getMap().get(match);
 		if (magicDoor == null) {
 			plugin.debugWarning("Failed to load door from magic-doors repo.");
 			return;
 		}
 
-		if (isRootDoorCopy && magicDoor.parentId == null) {
+		if (isRootDoorCopy && magicDoor.getParentId() == null) {
 			ItemMeta meta = itemInHand.getItemMeta();
 					
-			meta.setDisplayName(itemInHand.getItemMeta().getDisplayName() + "-" + PARENT_ID_EQUALS + magicDoor.id);
+			meta.setDisplayName(itemInHand.getItemMeta().getDisplayName() + "-" + PARENT_ID_EQUALS + magicDoor.getId());
 			itemInHand.setItemMeta(meta);
-			event.getPlayer().sendMessage(ChatColor.GREEN + "This copy has been lined and is ready to be placed");
+			event.getPlayer().sendMessage(ChatColor.GREEN + String.format(plugin.getLocalizedMessage("magic.doors.root.door.copy.imprinted"), getRootDoorCopyRecipe().getName()));
 			return;
 		}
 
-		if (isKey && magicDoor.parentId == null && (magicDoor.children == null || magicDoor.children.isEmpty())) {
+		if (isKey && magicDoor.getParentId() == null && (magicDoor.getChildren() == null || magicDoor.getChildren().isEmpty())) {
 			// This is a magic door with no children
-			event.getPlayer().sendMessage(ChatColor.RED + magicDoor.id + " has no children yet.");
+			event.getPlayer().sendMessage(ChatColor.RED + String.format(plugin.getLocalizedMessage("magic.doors.root.has.no.children"), magicDoor.getId()));
 			return;
 		}
 
-		if (magicDoor.parentId == null && isKey) {
+		if (magicDoor.getParentId() == null && isKey) {
 			// this is a root door, get children and teleport randomly
-			int childDoorNumber = random.nextInt(magicDoor.children.size());
-			String childId = magicDoor.children.get(childDoorNumber);
-			MagicDoor childDoor = magicDoorRepo.map.get(childId);
+			int childDoorNumber = random.nextInt(magicDoor.getChildren().size());
+			String childId = magicDoor.getChildren().get(childDoorNumber);
+			MagicDoor childDoor = magicDoorRepo.getMap().get(childId);
 
 			if (childDoor == null) {
-				event.getPlayer().sendMessage(ChatColor.RED + "Failed to find child door #" + (childDoorNumber + 1)
-						+ " of " + magicDoor.children.size());
+				event.getPlayer().sendMessage(ChatColor.RED + new MessageFormat(plugin.getLocalizedMessage("magic.doors.failed.to.find.child.door.number")).format(new Object[]{(childDoorNumber + 1)+"", magicDoor.getChildren().size()+""}));
 				return;
 			}
-			World world = plugin.getServer().getWorld(childDoor.world);
+			World world = plugin.getServer().getWorld(childDoor.getWorld());
 
 			if (world == null) {
-				event.getPlayer().sendMessage(ChatColor.RED + "Failed to find world '" + childDoor.world
-						+ "' for child door #" + (childDoorNumber + 1) + " of " + magicDoor.children.size());
+
+				event.getPlayer().sendMessage(ChatColor.RED + new MessageFormat(plugin.getLocalizedMessage("magic.doors.failed.to.find.world.child")).format(new Object[]{childDoor.getWorld(), (childDoorNumber + 1)+"",magicDoor.getChildren().size()+""}));
 				return;
 			}
 
-			Location destination = new Location(world, childDoor.playerX + 0.0, childDoor.playerY + 0.0,
-					childDoor.playerZ + 0.0);
+			Location destination = new Location(world, childDoor.getPlayerX() + 0.0, childDoor.getPlayerY() + 0.0,
+					childDoor.getPlayerZ() + 0.0);
 			event.getPlayer().teleport(destination);
-			event.getPlayer().sendMessage("You have been teleported to child door #" + childDoorNumber + " in the '"
-					+ magicDoor.id + "' magic door familiy");
-		} else if (magicDoor.parentId != null && isKey) {
+			
+			event.getPlayer().sendMessage(new MessageFormat(plugin.getLocalizedMessage("magic.doors.you.have.been.teleported.to.child")).format(new Object[]{(childDoorNumber+1)+"",magicDoor.getId()}));
+		} else if (magicDoor.getParentId() != null && isKey) {
 			// this is a child, teleport to parent
 
-			MagicDoor parentDoor = magicDoorRepo.map.get(magicDoor.parentId);
+			MagicDoor parentDoor = magicDoorRepo.getMap().get(magicDoor.getParentId());
 
 			if (parentDoor == null) {
 				event.getPlayer()
-						.sendMessage(ChatColor.RED + "Failed to find parent door with id: " + magicDoor.parentId);
+						.sendMessage(ChatColor.RED + String.format(plugin.getLocalizedMessage("magic.doors.failed.to.find.parent.door.id"),magicDoor.getParentId()));
 				return;
 			}
-			World world = plugin.getServer().getWorld(parentDoor.world);
+			World world = plugin.getServer().getWorld(parentDoor.getWorld());
 
 			if (world == null) {
-				event.getPlayer().sendMessage(ChatColor.RED + "Failed to find world '" + parentDoor.world
-						+ "' for parent door with id: " + magicDoor.parentId);
+				event.getPlayer().sendMessage(ChatColor.RED + new MessageFormat(plugin.getLocalizedMessage("magic.doors.failed.to.find.world.parent")).format(new Object[]{parentDoor.getWorld(),magicDoor.getParentId()}));
 				return;
 			}
 
-			Location destination = new Location(world, parentDoor.playerX + 0.0, parentDoor.playerY + 0.0,
-					parentDoor.playerZ + 0.0);
+			Location destination = new Location(world, parentDoor.getPlayerX() + 0.0, parentDoor.getPlayerY() + 0.0,
+					parentDoor.getPlayerZ() + 0.0);
 			event.getPlayer().teleport(destination);
+			
+			//magic.doors.you.have.been.teleported.to.root
 			event.getPlayer().sendMessage(
-					"You have been teleported to the root door in the '" + magicDoor.parentId + "' magic door familiy");
+					new MessageFormat(plugin.getLocalizedMessage("magic.doors.you.have.been.teleported.to.root")).format(new Object[]{magicDoor.getParentId()}) );
 		}
+	}
+	
+	
+	////////////////////////////////////
+	//PRIVATE HELPERS///////////////////
+	////////////////////////////////////
+	
+	private void initMagicDoorRepo(){
+		if(magicDoorRepo == null){
+			magicDoorRepo = plugin.getTypeData(DATA_KEY_MAGIC_DOORS, MagicDoorRepo.class);
+
+			if(magicDoorRepo == null || magicDoorRepo.getMap() == null){
+				magicDoorRepo = new MagicDoorRepo();
+				magicDoorRepo.setMap(new HashMap<String, MagicDoor>());
+				updateMagicDoorRepo();
+			}
+		}
+	}
+	
+	private void updateMagicDoorRepo(){
+		plugin.setData(DATA_KEY_MAGIC_DOORS, magicDoorRepo);
+	}
+	
+	private void initDimentionItemCount(){
+		if (dimentionItemCount == null) {
+			dimentionItemCount = plugin.getTypeData(DATA_KEY_MAGIC_DOOR_DIMENTION_MAP, DimentionItemCount.class);
+			if(dimentionItemCount == null || dimentionItemCount.getItemsInDimentionAtValue() == null){
+				dimentionItemCount = new DimentionItemCount();
+				dimentionItemCount.setItemsInDimentionAtValue(new HashMap<String, Map<Integer, Set<String>>>());
+				updateDimentionItemCount();
+			}
+		}
+	}
+	
+	private void updateDimentionItemCount(){
+		plugin.setData(DATA_KEY_MAGIC_DOOR_DIMENTION_MAP, dimentionItemCount, true);
+	}
+	
+	private List<String> getDimentionList(){
+		List<String> dimentions = new ArrayList<String>();
+		dimentions.add("x");
+		dimentions.add("y");
+		dimentions.add("z");
+		return dimentions;
+	}
+	
+	private boolean addDoor(MagicDoor magicDoor){
+		try {
+
+			initMagicDoorRepo();
+			initDimentionItemCount();
+
+			for (String dimention : getDimentionList()) {
+				if (dimentionItemCount.getItemsInDimentionAtValue().get(dimention) == null) {
+					dimentionItemCount.getItemsInDimentionAtValue().put(dimention, new HashMap<Integer, Set<String>>());
+				}
+
+				int value = dimention.equals("x") ? magicDoor.getX()
+						: (dimention.equals("y") ? magicDoor.getY() : magicDoor.getZ());
+
+				if (dimentionItemCount.getItemsInDimentionAtValue().get(dimention).get(value) == null) {
+					dimentionItemCount.getItemsInDimentionAtValue().get(dimention).put(value, new HashSet<String>());
+				}
+				dimentionItemCount.getItemsInDimentionAtValue().get(dimention).get(value).add(magicDoor.getId());
+			}
+			magicDoorRepo.getMap().put(magicDoor.getId(), magicDoor);
+			updateDimentionItemCount();
+			updateMagicDoorRepo();
+		} catch (Exception e) {
+			plugin.warning("Unexpected error while saving door: " + e.getMessage());
+			return false;
+			
+		}
+		
+		return true;
 	}
 	
 	private String solveClash(String id, MagicDoorRepo repo, int start){
 		String newId = id + "-" + start;
 		
-		if(repo.map.containsKey(newId)){
+		if(repo.getMap().containsKey(newId)){
 			return solveClash(id, repo, start + 1);
 		}
 		
 		return newId;
 	}
+	
+	
 	private String getNewDoorId(){
 		
 		String doorId = null;
@@ -470,24 +529,12 @@ public class RootDoorListener implements Listener {
 		
 		return doorId;
 	}
-
-
-
-	public class MagicDoorRepo {
-		public Map<String, MagicDoor> map;
-	}
-
-	public class MagicDoor {
-		public String id;
-		public String parentId;
-		public Map<Integer, String> children;
-		public String world;
-		public int x;
-		public int y;
-		public int z;
-		public int playerX;
-		public int playerY;
-		public int playerZ;
-	}
+	
+	
+	
+	
+	////////////////////////////////////////////////////
+	////////////////MODEL CLASSES///////////////////////
+	////////////////////////////////////////////////////
 
 }
