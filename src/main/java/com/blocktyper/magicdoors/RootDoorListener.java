@@ -376,7 +376,7 @@ public class RootDoorListener implements Listener {
 
 			if (world == null) {
 
-				event.getPlayer().sendMessage(ChatColor.RED + new MessageFormat(plugin.getLocalizedMessage("magic.doors.failed.to.find.world.child")).format(new Object[]{childDoor.getWorld(), (childDoorNumber + 1)+"",magicDoor.getChildren().size()+""}));
+				event.getPlayer().sendMessage(ChatColor.RED + new MessageFormat(plugin.getLocalizedMessage("magic.doors.failed.to.find.world")).format(new Object[]{childDoor.getWorld()}));
 				return;
 			}
 
@@ -398,7 +398,7 @@ public class RootDoorListener implements Listener {
 			World world = plugin.getServer().getWorld(parentDoor.getWorld());
 
 			if (world == null) {
-				event.getPlayer().sendMessage(ChatColor.RED + new MessageFormat(plugin.getLocalizedMessage("magic.doors.failed.to.find.world.parent")).format(new Object[]{parentDoor.getWorld(),magicDoor.getParentId()}));
+				event.getPlayer().sendMessage(ChatColor.RED + new MessageFormat(plugin.getLocalizedMessage("magic.doors.failed.to.find.world")).format(new Object[]{parentDoor.getWorld()}));
 				return;
 			}
 
