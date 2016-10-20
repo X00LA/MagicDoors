@@ -18,7 +18,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -86,7 +85,7 @@ public class RootDoorListener implements Listener {
 	private IRecipe getRecipeFromKey(String key) {
 		String itemKey = plugin.config().getConfig().getString(key);
 		
-		plugin.info("loading recipe for " + key + ": '" + itemKey + "'");
+		plugin.debugInfo("loading recipe for " + key + ": '" + itemKey + "'");
 		IRecipe recipe = plugin.recipeRegistrar().getRecipeFromKey(itemKey);
 		if (recipe == null) {
 			plugin.warning("recipe '" + itemKey + "' was not found");
@@ -103,11 +102,6 @@ public class RootDoorListener implements Listener {
 		
 		initMagicDoorRepo();
 		initDimentionItemCount();
-	}
-
-	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = false)
-	public void entityShootBow(EntityShootBowEvent event) {
-		plugin.debugInfo("EntityShootBowEvent");
 	}
 	
 	

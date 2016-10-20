@@ -5,8 +5,9 @@
 
 
 ############## DEBUG ##########################
+locale: en
 debug: false
-log.recipes.enable: true
+log.recipes.enable: false
 
 
 ############## MAGIC DOOR SETTINGS ############
@@ -89,6 +90,8 @@ recipe.door-key.keep:
   - NNN
   - NYN
   - NNN
+recipe.door-key.listeners: 
+  - com.blocktyper.magicdoors.KeyPlaceListener
 ############ END Door Key ##########
 
 
