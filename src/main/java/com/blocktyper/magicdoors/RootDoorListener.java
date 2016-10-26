@@ -95,7 +95,7 @@ public class RootDoorListener implements Listener {
 	}
 
 	public RootDoorListener() {
-		plugin = BlockTyperPlugin.plugin;
+		plugin = BlockTyperPlugin.plugin.get("MagicDoors");
 		
 		doorPrefixes = plugin.getConfig().getStringList(DOOR_NAME_PREFIXES);
 		doorSuffixes = plugin.getConfig().getStringList(DOOR_NAME_SUFFIXES);

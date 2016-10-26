@@ -45,7 +45,7 @@ public class KeyPlaceListener implements Listener {
 	}
 
 	public KeyPlaceListener() {
-		plugin = BlockTyperPlugin.plugin;
+		plugin = BlockTyperPlugin.plugin.get("MagicDoors");
 	}
 
 	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = false)
