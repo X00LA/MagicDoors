@@ -12,8 +12,10 @@ log.recipes.enable: false
 
 ############## MAGIC DOOR SETTINGS ############
 magic.doors.recipe.name.root.door: root-door
+magic.doors.recipe.name.owned.root.door: owned-root-door
 magic.doors.recipe.name.door.copy: root-door-copy
 magic.doors.recipe.name.door.key: door-key
+magic.doors.recipe.name.skeleton.key: skeleton-key
 
   
 
@@ -24,8 +26,10 @@ magic.doors.recipe.name.door.key: door-key
 ############## RECIPES ############
 recipes:
   - root-door
+  - owned-root-door
   - root-door-copy
   - door-key
+  - skeleton-key
 
 
 ###############################################
@@ -46,6 +50,26 @@ recipe.root-door.output: IRON_DOOR
 
 recipe.root-door.listeners: 
   - com.blocktyper.magicdoors.RootDoorListener
+  
+################## END Root Door ############
+  
+  
+  
+  
+################## BEGIN Owned Root Door ############
+recipe.owned-root-door.name: √Owned Root
+recipe.owned-root-door.rows: 
+  - DED
+  - DID
+  - DDD
+recipe.owned-root-door.mats: 
+  - D=DIAMOND
+  - E=EMERALD
+  - I=IRON_DOOR
+recipe.owned-root-door.output: IRON_DOOR
+
+################## END Owned Root Door ############
+
 
 ################## BEGIN ROOT DOOR COPY #################
 recipe.root-door-copy.name: ^RootDoorCopy
@@ -92,7 +116,33 @@ recipe.door-key.keep:
   - NNN
 recipe.door-key.listeners: 
   - com.blocktyper.magicdoors.KeyPlaceListener
+  
 ############ END Door Key ##########
+
+
+
+############ BEGIN Skeleton Key ##########
+recipe.skeleton-key.name: ^SkeletonKey
+recipe.skeleton-key.rows: 
+  - ABA
+  - ADA
+  - ALA
+recipe.skeleton-key.mats: 
+  - B=BONE
+  - A=AIR
+  - D=IRON_DOOR
+  - L=LAVA_BUCKET
+recipe.skeleton-key.item.starts.with: 
+  - 4=^RootDoorCopy
+recipe.skeleton-key.output: BONE
+recipe.skeleton-key.item.starts.with: []
+recipe.skeleton-key.keep: 
+  - NNN
+  - NYN
+  - NNN
+
+  
+############ END Skeleton Key ##########
 
 
 

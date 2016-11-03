@@ -13,6 +13,7 @@ public class MagicDoor {
 	private int playerX;
 	private int playerY;
 	private int playerZ;
+	private String ownerName;
 	
 	
 	public String getId() {
@@ -75,6 +76,13 @@ public class MagicDoor {
 	public void setPlayerZ(int playerZ) {
 		this.playerZ = playerZ;
 	}
+	public String getOwnerName() {
+		return ownerName;
+	}
+	public void setOwnerName(String ownerName) {
+		this.ownerName = ownerName;
+	}
+	
 	
 	
 }
