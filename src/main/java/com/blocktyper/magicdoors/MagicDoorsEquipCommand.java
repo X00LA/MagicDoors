@@ -1,11 +1,11 @@
 package com.blocktyper.magicdoors;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -43,38 +43,13 @@ public class MagicDoorsEquipCommand implements CommandExecutor{
 			if (!player.isOp())
 				return false;
 
-			Set<Material> distinctMaterials = new HashSet<Material>();
+			Set<Material> distinctMaterials = getDistinctMatsForRecipes(
+					MagicDoorsPlugin.RECIPE_NAME_DOOR_KEY,
+					MagicDoorsPlugin.RECIPE_NAME_ROOT_DOOR_COPY,
+					MagicDoorsPlugin.RECIPE_NAME_ROOT_DOOR,
+					MagicDoorsPlugin.RECIPE_NAME_OWNED_ROOT_DOOR,
+					MagicDoorsPlugin.RECIPE_NAME_SKELETON_KEY);
 
-			String itemKey = plugin.config().getConfig().getString(MagicDoorsPlugin.RECIPE_NAME_DOOR_KEY);
-			IRecipe doorKeyRecipe = plugin.recipeRegistrar().getRecipeFromKey(itemKey);
-			if(doorKeyRecipe == null)
-				plugin.warning("doorKeyRecipe was null");
-			
-			itemKey = plugin.config().getConfig().getString(MagicDoorsPlugin.RECIPE_NAME_ROOT_DOOR_COPY);
-			IRecipe rootDoorCopyRecipe = plugin.recipeRegistrar().getRecipeFromKey(itemKey);
-			if(rootDoorCopyRecipe == null)
-				plugin.warning("rootDoorCopyRecipe was null");
-			
-			itemKey = plugin.config().getConfig().getString(MagicDoorsPlugin.RECIPE_NAME_ROOT_DOOR);
-			IRecipe rootDoorRecipe = plugin.recipeRegistrar().getRecipeFromKey(itemKey);
-			if(rootDoorRecipe == null)
-				plugin.warning("rootDoorRecipe was null");
-			
-			Set<Material> doorKeyRecipeItems = getDistinctMaterialsForRecipe(doorKeyRecipe);
-			Set<Material> rootDoorCopyRecipeItems = getDistinctMaterialsForRecipe(rootDoorCopyRecipe);
-			Set<Material> rootDoorRecipeItems = getDistinctMaterialsForRecipe(rootDoorRecipe);
-
-			if (doorKeyRecipeItems != null) {
-				distinctMaterials.addAll(doorKeyRecipeItems);
-			}
-
-			if (rootDoorCopyRecipeItems != null) {
-				distinctMaterials.addAll(rootDoorCopyRecipeItems);
-			}
-
-			if (rootDoorRecipeItems != null) {
-				distinctMaterials.addAll(rootDoorRecipeItems);
-			}
 			
 			if(distinctMaterials == null || distinctMaterials.isEmpty()){
 				plugin.warning("distinctMaterials was null");
@@ -82,15 +57,9 @@ public class MagicDoorsEquipCommand implements CommandExecutor{
 				return false;
 			}
 
-			List<ItemStack> items = new ArrayList<ItemStack>();
-			for (Material mat : distinctMaterials) {
-				int maxStackSize = mat.getMaxStackSize();
-				ItemStack item = new ItemStack(mat);
-				item.setAmount(maxStackSize);
-				items.add(item);
-			}
+			List<ItemStack> items = distinctMaterials.parallelStream().map(material -> getMaxItemStack(material)).collect(Collectors.toList());
 
-			if (items.size() <= 0) {
+			if (items == null || items.size() <= 0) {
 				player.sendMessage(ChatColor.RED + "Error running '" + COMMAND_MD_EQUIP + "'. No magic door item found.");
 				return false;
 			}
@@ -98,9 +67,15 @@ public class MagicDoorsEquipCommand implements CommandExecutor{
 			int rows = (items.size() / 9) + 1;
 			Inventory magicBlocksInventory = Bukkit.createInventory(null, rows * 9, "(Magic Doors)");
 			
+			plugin.debugInfo("[md-equip] items size: " + items.size());
+			
 			int i = -1;
 			for(ItemStack item : items){
+				if(item == null || item.getType().equals(Material.AIR))
+					continue;
+				
 				i++;
+				plugin.debugInfo("  -item["+i+"]: " + item != null ? item.getType().name() : "null");
 				magicBlocksInventory.setItem(i, item);
 			}
 
@@ -113,33 +88,49 @@ public class MagicDoorsEquipCommand implements CommandExecutor{
 		}
 	}
 	
+	private Set<Material> getDistinctMatsForRecipes(String... recipeNames){
+		Set<Material> distinctMaterials = null;
+		if(recipeNames != null){
+			distinctMaterials = Arrays.asList(recipeNames).parallelStream()
+				.map(recipeName -> getDistinctMaterialsFromRecipeFromName(recipeName))
+				.flatMap(sets -> sets.stream())
+				.collect(Collectors.toSet());
+		}
+		return distinctMaterials;
+	}
+	
+	private Set<Material> getDistinctMaterialsFromRecipeFromName(String recipeName){
+		String itemKey = plugin.config().getConfig().getString(recipeName);
+		IRecipe recipe = plugin.recipeRegistrar().getRecipeFromKey(itemKey);
+		return getDistinctMaterialsForRecipe(recipe);
+	}
+	
+	private ItemStack getMaxItemStack(Material materiall){
+		int maxStackSize = materiall.getMaxStackSize();
+		ItemStack itemStack = new ItemStack(materiall);
+		itemStack.setAmount(maxStackSize);
+		return itemStack;
+	}
+	
 	
 	
 	private Set<Material> getDistinctMaterialsForRecipe(IRecipe recipe) {
 		if (recipe == null)
 			return null;
-
-		Map<Material, Integer> materialCountMap = new HashMap<Material, Integer>();
 		
 		if(recipe.getMaterialMatrix() == null || recipe.getMaterialMatrix().isEmpty()){
 			plugin.warning("Material matrix was null or empty for " + recipe.getName());
 			return null;
 		}
-
-		for (Material mat : recipe.getMaterialMatrix()) {
-
-			if (!materialCountMap.containsKey(mat)) {
-				materialCountMap.put(mat, 1);
-			} else {
-				materialCountMap.put(mat, materialCountMap.get(mat) + 1);
-			}
-		}
 		
-		if(materialCountMap == null || materialCountMap.isEmpty()){
-			plugin.warning("materialCountMap was null or empty for " + recipe.getName());
+		Set<Material> materialSet = recipe.getMaterialMatrix().parallelStream().collect(Collectors.toSet());
+	        
+		
+		if(materialSet == null || materialSet.isEmpty()){
+			plugin.warning("materialSet was null or empty for " + recipe.getName());
 			return null;
 		}
 
-		return materialCountMap.keySet();
+		return materialSet;
 	}
 }
