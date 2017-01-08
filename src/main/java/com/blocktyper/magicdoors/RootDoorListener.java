@@ -217,7 +217,7 @@ public class RootDoorListener implements Listener {
 				MagicDoor parentDoor = parentId != null ? magicDoorRepo.getMap().get(parentId) : null;
 
 				if (parentDoor == null) {
-					event.getPlayer().sendMessage(ChatColor.RED + plugin.getLocalizedMessage("magic.doors.attempted.to.place.orphan.door"));
+					event.getPlayer().sendMessage(ChatColor.RED + plugin.getLocalizedMessage("magic.doors.attempted.to.place.orphan.door", event.getPlayer()));
 					event.setCancelled(true);
 					return;
 				} else {
@@ -245,7 +245,7 @@ public class RootDoorListener implements Listener {
 			addDoor(doorToMake);
 
 
-			event.getPlayer().sendMessage(ChatColor.GREEN + String.format(plugin.getLocalizedMessage("magic.doors.you.placed.a.magic.door"), doorId));
+			event.getPlayer().sendMessage(ChatColor.GREEN + String.format(plugin.getLocalizedMessage("magic.doors.you.placed.a.magic.door", event.getPlayer()), doorId));
 		}catch(Exception e){
 			plugin.warning("Unexpected error in 'RootDoorListener.onBlockPlace'. Message: " + e.getMessage());
 		}
@@ -376,7 +376,7 @@ public class RootDoorListener implements Listener {
 					
 			meta.setDisplayName(itemInHand.getItemMeta().getDisplayName() + "-" + PARENT_ID_EQUALS + magicDoor.getId());
 			itemInHand.setItemMeta(meta);
-			event.getPlayer().sendMessage(ChatColor.GREEN + String.format(plugin.getLocalizedMessage("magic.doors.root.door.copy.imprinted"), getRootDoorCopyRecipe().getName()));
+			event.getPlayer().sendMessage(ChatColor.GREEN + String.format(plugin.getLocalizedMessage("magic.doors.root.door.copy.imprinted", event.getPlayer()), getRootDoorCopyRecipe().getName()));
 			return;
 		}
 		
@@ -391,14 +391,14 @@ public class RootDoorListener implements Listener {
 					String keyName = plainKeyMeta.getDisplayName() + " ["+magicDoor.getId()+"]";
 					plainKeyMeta.setDisplayName(keyName);
 					itemInHand.setItemMeta(plainKeyMeta);
-					event.getPlayer().sendMessage(ChatColor.GREEN + String.format(plugin.getLocalizedMessage("magic.doors.key.imprinted"), keyName));
+					event.getPlayer().sendMessage(ChatColor.GREEN + String.format(plugin.getLocalizedMessage("magic.doors.key.imprinted", event.getPlayer()), keyName));
 					return;
 				}
 			}
 			
 			if (magicDoor.getChildren() == null || magicDoor.getChildren().isEmpty()) {
 				// This is a magic door with no children
-				event.getPlayer().sendMessage(ChatColor.RED + String.format(plugin.getLocalizedMessage("magic.doors.root.has.no.children"), magicDoor.getId()));
+				event.getPlayer().sendMessage(ChatColor.RED + String.format(plugin.getLocalizedMessage("magic.doors.root.has.no.children", event.getPlayer()), magicDoor.getId()));
 				return;
 			}
 		}
@@ -411,7 +411,7 @@ public class RootDoorListener implements Listener {
 				if(isSkeletonKey && magicDoor.getOwnerName().equals(event.getPlayer().getName())){
 					//this is the current player's door and they are using their skeleton key
 				}else{
-					event.getPlayer().sendMessage(ChatColor.RED + String.format(plugin.getLocalizedMessage("magic.doors.named.key.required"), magicDoor.getId()));
+					event.getPlayer().sendMessage(ChatColor.RED + String.format(plugin.getLocalizedMessage("magic.doors.named.key.required", event.getPlayer()), magicDoor.getId()));
 					return;
 				}
 			}
@@ -422,14 +422,14 @@ public class RootDoorListener implements Listener {
 			MagicDoor childDoor = magicDoorRepo.getMap().get(childId);
 
 			if (childDoor == null) {
-				event.getPlayer().sendMessage(ChatColor.RED + new MessageFormat(plugin.getLocalizedMessage("magic.doors.failed.to.find.child.door.number")).format(new Object[]{(childDoorNumber + 1)+"", magicDoor.getChildren().size()+""}));
+				event.getPlayer().sendMessage(ChatColor.RED + new MessageFormat(plugin.getLocalizedMessage("magic.doors.failed.to.find.child.door.number", event.getPlayer())).format(new Object[]{(childDoorNumber + 1)+"", magicDoor.getChildren().size()+""}));
 				return;
 			}
 			World world = plugin.getServer().getWorld(childDoor.getWorld());
 
 			if (world == null) {
 
-				event.getPlayer().sendMessage(ChatColor.RED + new MessageFormat(plugin.getLocalizedMessage("magic.doors.failed.to.find.world")).format(new Object[]{childDoor.getWorld()}));
+				event.getPlayer().sendMessage(ChatColor.RED + new MessageFormat(plugin.getLocalizedMessage("magic.doors.failed.to.find.world", event.getPlayer())).format(new Object[]{childDoor.getWorld()}));
 				return;
 			}
 
@@ -437,7 +437,7 @@ public class RootDoorListener implements Listener {
 					childDoor.getPlayerZ() + 0.0);
 			event.getPlayer().teleport(destination);
 			
-			event.getPlayer().sendMessage(new MessageFormat(plugin.getLocalizedMessage("magic.doors.you.have.been.teleported.to.child")).format(new Object[]{(childDoorNumber+1)+"",magicDoor.getId()}));
+			event.getPlayer().sendMessage(new MessageFormat(plugin.getLocalizedMessage("magic.doors.you.have.been.teleported.to.child", event.getPlayer())).format(new Object[]{(childDoorNumber+1)+"",magicDoor.getId()}));
 		} else if (magicDoor.getParentId() != null && isKey) {
 			// this is a child, teleport to parent
 
@@ -445,7 +445,7 @@ public class RootDoorListener implements Listener {
 
 			if (parentDoor == null) {
 				event.getPlayer()
-						.sendMessage(ChatColor.RED + String.format(plugin.getLocalizedMessage("magic.doors.failed.to.find.parent.door.id"),magicDoor.getParentId()));
+						.sendMessage(ChatColor.RED + String.format(plugin.getLocalizedMessage("magic.doors.failed.to.find.parent.door.id", event.getPlayer()),magicDoor.getParentId()));
 				return;
 			}
 			
@@ -453,7 +453,7 @@ public class RootDoorListener implements Listener {
 				if(isSkeletonKey && parentDoor.getOwnerName().equals(event.getPlayer().getName())){
 					//this is the current player's door and they are using their skeleton key
 				}else{
-					event.getPlayer().sendMessage(ChatColor.RED + String.format(plugin.getLocalizedMessage("magic.doors.named.key.required"), parentDoor.getId()));
+					event.getPlayer().sendMessage(ChatColor.RED + String.format(plugin.getLocalizedMessage("magic.doors.named.key.required", event.getPlayer()), parentDoor.getId()));
 					return;
 				}
 				
@@ -462,7 +462,7 @@ public class RootDoorListener implements Listener {
 			World world = plugin.getServer().getWorld(parentDoor.getWorld());
 
 			if (world == null) {
-				event.getPlayer().sendMessage(ChatColor.RED + new MessageFormat(plugin.getLocalizedMessage("magic.doors.failed.to.find.world")).format(new Object[]{parentDoor.getWorld()}));
+				event.getPlayer().sendMessage(ChatColor.RED + new MessageFormat(plugin.getLocalizedMessage("magic.doors.failed.to.find.world", event.getPlayer())).format(new Object[]{parentDoor.getWorld()}));
 				return;
 			}
 
@@ -472,7 +472,7 @@ public class RootDoorListener implements Listener {
 			
 			//magic.doors.you.have.been.teleported.to.root
 			event.getPlayer().sendMessage(
-					new MessageFormat(plugin.getLocalizedMessage("magic.doors.you.have.been.teleported.to.root")).format(new Object[]{magicDoor.getParentId()}) );
+					new MessageFormat(plugin.getLocalizedMessage("magic.doors.you.have.been.teleported.to.root", event.getPlayer())).format(new Object[]{magicDoor.getParentId()}) );
 		}
 	}
 	
