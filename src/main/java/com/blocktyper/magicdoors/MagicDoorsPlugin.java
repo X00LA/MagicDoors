@@ -15,11 +15,16 @@ public class MagicDoorsPlugin extends BlockTyperPlugin {
 	public static String RECIPE_NAME_DOOR_KEY = "magic.doors.recipe.name.door.key";
 	public static String RECIPE_NAME_SKELETON_KEY = "magic.doors.recipe.name.skeleton.key";
 
+	private static MagicDoorsPlugin plugin;
 	
+	public MagicDoorsPlugin(){
+		if(plugin == null){
+			plugin = this;
+		}
+	}
 
 	public void onEnable() {
 		super.onEnable();
-
 		new MagicDoorsEquipCommand(this);
 	}
 
@@ -29,4 +34,8 @@ public class MagicDoorsPlugin extends BlockTyperPlugin {
 		return ResourceBundle.getBundle(RESOURCE_NAME, locale);
 	}
 	// end localization
+	
+	public static MagicDoorsPlugin getPlugin(){
+		return plugin;
+	}
 }

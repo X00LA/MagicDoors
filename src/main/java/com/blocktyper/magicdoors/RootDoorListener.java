@@ -24,15 +24,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import com.blocktyper.magicdoors.data.DimentionItemCount;
 import com.blocktyper.magicdoors.data.MagicDoor;
 import com.blocktyper.magicdoors.data.MagicDoorRepo;
-import com.blocktyper.plugin.BlockTyperPlugin;
 import com.blocktyper.recipes.IRecipe;
-
-
-/*
- * magic.doors.door=Magische Tür
-magic.doors.key=Magie Türschlüssel
-block.typer.loading.recipes=Laden Rezepte
- */
 
 
 public class RootDoorListener implements Listener {
@@ -47,11 +39,10 @@ public class RootDoorListener implements Listener {
 
 	public static final String PARENT_ID_EQUALS = "parentId=";
 
-	private final BlockTyperPlugin plugin;
 	private List<String> doorPrefixes;
 	private List<String> doorSuffixes;
 
-	Random random = new Random();
+	private Random random = new Random();
 
 	private IRecipe rootDoorRecipe;
 	private IRecipe rootDoorRecipeWithOwner;
@@ -99,22 +90,21 @@ public class RootDoorListener implements Listener {
 	}
 
 	private IRecipe getRecipeFromKey(String key) {
-		String itemKey = plugin.config().getConfig().getString(key);
+		String itemKey = MagicDoorsPlugin.getPlugin().config().getConfig().getString(key);
 		
-		plugin.debugInfo("loading recipe for " + key + ": '" + itemKey + "'");
-		IRecipe recipe = plugin.recipeRegistrar().getRecipeFromKey(itemKey);
+		MagicDoorsPlugin.getPlugin().debugInfo("loading recipe for " + key + ": '" + itemKey + "'");
+		IRecipe recipe = MagicDoorsPlugin.getPlugin().recipeRegistrar().getRecipeFromKey(itemKey);
 		if (recipe == null) {
-			plugin.warning("recipe '" + itemKey + "' was not found");
+			MagicDoorsPlugin.getPlugin().warning("recipe '" + itemKey + "' was not found");
 		}
 		return recipe;
 
 	}
 
 	public RootDoorListener() {
-		plugin = BlockTyperPlugin.plugin.get("MagicDoors");
 		
-		doorPrefixes = plugin.getConfig().getStringList(DOOR_NAME_PREFIXES);
-		doorSuffixes = plugin.getConfig().getStringList(DOOR_NAME_SUFFIXES);
+		doorPrefixes = MagicDoorsPlugin.getPlugin().getConfig().getStringList(DOOR_NAME_PREFIXES);
+		doorSuffixes = MagicDoorsPlugin.getPlugin().getConfig().getStringList(DOOR_NAME_SUFFIXES);
 		
 		initMagicDoorRepo();
 		initDimentionItemCount();
@@ -125,17 +115,17 @@ public class RootDoorListener implements Listener {
 	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = false)
 	public void onBlockPlace(BlockPlaceEvent event) {
 		try{
-			plugin.debugInfo("BlockPlaceEvent - Material " + event.getBlock().getType().name());
+			MagicDoorsPlugin.getPlugin().debugInfo("BlockPlaceEvent - Material " + event.getBlock().getType().name());
 
 			//if there is no root door recipe defined, do not continue
 			if (getRootDoorRecipe() == null) {
-				plugin.debugWarning("No magic door recipe.");
+				MagicDoorsPlugin.getPlugin().debugWarning("No magic door recipe.");
 				return;
 			}
 
 			//if there is no root door copy recipe defined, do not continue
 			if (getRootDoorCopyRecipe() == null) {
-				plugin.debugWarning("No magic door copy recipe.");
+				MagicDoorsPlugin.getPlugin().debugWarning("No magic door copy recipe.");
 				return;
 			}
 
@@ -143,20 +133,20 @@ public class RootDoorListener implements Listener {
 
 			//if player is not holding a item, do not continue
 			if (itemInHand == null) {
-				plugin.debugWarning("Not holding an item");
+				MagicDoorsPlugin.getPlugin().debugWarning("Not holding an item");
 				return;
 			}
 
 			//if player is not holding a magic door, do not continue
 			if (!itemInHand.getType().equals(getRootDoorRecipe().getOutput()) && !itemInHand.getType().equals(getRootDoorCopyRecipe().getOutput())) {
-				plugin.debugWarning(
+				MagicDoorsPlugin.getPlugin().debugWarning(
 						"Not holding a magic door");
 				return;
 			}
 
 			//if the item does not have a display name, do not continue
 			if (itemInHand.getItemMeta() == null || itemInHand.getItemMeta().getDisplayName() == null) {
-				plugin.debugWarning("Not holding door with a name.");
+				MagicDoorsPlugin.getPlugin().debugWarning("Not holding door with a name.");
 				return;
 			}
 
@@ -164,11 +154,11 @@ public class RootDoorListener implements Listener {
 
 			//if the item name does not equal the name of the current Root Door or Root Door Copy, do not continue
 			if (!itemName.equals(getRootDoorRecipe().getName()) && !itemName.equals(getOwnedRootDoorRecipe().getName()) &&!itemName.startsWith((getRootDoorCopyRecipe().getName()))) {
-				plugin.debugWarning("Not holding door with the magic door name: '" + itemName + "' != '"
+				MagicDoorsPlugin.getPlugin().debugWarning("Not holding door with the magic door name: '" + itemName + "' != '"
 						+ getRootDoorRecipe().getName() + "'");
-				plugin.debugWarning("Not holding door with the magic door name: '" + itemName + "' != '"
+				MagicDoorsPlugin.getPlugin().debugWarning("Not holding door with the magic door name: '" + itemName + "' != '"
 						+ getOwnedRootDoorRecipe().getName() + "'");
-				plugin.debugWarning("Not holding door with the magic door name: '" + itemName + "' != '"
+				MagicDoorsPlugin.getPlugin().debugWarning("Not holding door with the magic door name: '" + itemName + "' != '"
 						+ getRootDoorCopyRecipe().getName() + "'");
 				return;
 			}
@@ -217,7 +207,7 @@ public class RootDoorListener implements Listener {
 				MagicDoor parentDoor = parentId != null ? magicDoorRepo.getMap().get(parentId) : null;
 
 				if (parentDoor == null) {
-					event.getPlayer().sendMessage(ChatColor.RED + plugin.getLocalizedMessage("magic.doors.attempted.to.place.orphan.door", event.getPlayer()));
+					event.getPlayer().sendMessage(ChatColor.RED + MagicDoorsPlugin.getPlugin().getLocalizedMessage("magic.doors.attempted.to.place.orphan.door", event.getPlayer()));
 					event.setCancelled(true);
 					return;
 				} else {
@@ -245,38 +235,38 @@ public class RootDoorListener implements Listener {
 			addDoor(doorToMake);
 
 
-			event.getPlayer().sendMessage(ChatColor.GREEN + String.format(plugin.getLocalizedMessage("magic.doors.you.placed.a.magic.door", event.getPlayer()), doorId));
+			event.getPlayer().sendMessage(ChatColor.GREEN + String.format(MagicDoorsPlugin.getPlugin().getLocalizedMessage("magic.doors.you.placed.a.magic.door", event.getPlayer()), doorId));
 		}catch(Exception e){
-			plugin.warning("Unexpected error in 'RootDoorListener.onBlockPlace'. Message: " + e.getMessage());
+			MagicDoorsPlugin.getPlugin().warning("Unexpected error in 'RootDoorListener.onBlockPlace'. Message: " + e.getMessage());
 		}
 		
 	}
 
 	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = false)
 	public void blockDamage(BlockDamageEvent event) {
-		plugin.debugInfo("BlockDamageEvent - Material " + event.getBlock().getType().name());
+		MagicDoorsPlugin.getPlugin().debugInfo("BlockDamageEvent - Material " + event.getBlock().getType().name());
 
 		ItemStack itemInHand = event.getItemInHand();
 
 		if (itemInHand == null) {
-			plugin.debugWarning("Not holding an item");
+			MagicDoorsPlugin.getPlugin().debugWarning("Not holding an item");
 			return;
 		}
 
 		if (!itemInHand.getType().equals(getRootDoorCopyRecipe().getOutput()) &&
 				!itemInHand.getType().equals(getDoorKeyRecipe().getOutput()) &&
 				!itemInHand.getType().equals(getSkeletonKeyRecipe().getOutput())) {
-			plugin.debugWarning(
+			MagicDoorsPlugin.getPlugin().debugWarning(
 					"Not holding an item which is the same type as the magic door type: " + getRootDoorCopyRecipe().getOutput());
-			plugin.debugWarning(
+			MagicDoorsPlugin.getPlugin().debugWarning(
 					"Not holding an item which is the same type as the magic door type: " + getDoorKeyRecipe().getOutput());
-			plugin.debugWarning(
+			MagicDoorsPlugin.getPlugin().debugWarning(
 					"Not holding an item which is the same type as the magic door type: " + getSkeletonKeyRecipe().getOutput());
 			return;
 		}
 
 		if (itemInHand.getItemMeta() == null || itemInHand.getItemMeta().getDisplayName() == null) {
-			plugin.debugWarning("Not holding door with a name.");
+			MagicDoorsPlugin.getPlugin().debugWarning("Not holding door with a name.");
 			return;
 		}
 
@@ -288,7 +278,7 @@ public class RootDoorListener implements Listener {
 		boolean isRootDoorCopy = itemName.equals(getRootDoorCopyRecipe().getName());
 
 		if (!isRootDoorCopy && !isKey) {
-			plugin.debugInfo("Not a magic door related object in hand");
+			MagicDoorsPlugin.getPlugin().debugInfo("Not a magic door related object in hand");
 			return;
 		}
 		
@@ -296,7 +286,7 @@ public class RootDoorListener implements Listener {
 
 		if (dimentionItemCount == null || dimentionItemCount.getItemsInDimentionAtValue() == null
 				|| dimentionItemCount.getItemsInDimentionAtValue().isEmpty()) {
-			plugin.debugInfo("no dimention values recorded");
+			MagicDoorsPlugin.getPlugin().debugInfo("no dimention values recorded");
 			return;
 		}
 
@@ -308,7 +298,7 @@ public class RootDoorListener implements Listener {
 			if (!dimentionItemCount.getItemsInDimentionAtValue().containsKey(dimention)
 					|| dimentionItemCount.getItemsInDimentionAtValue().get(dimention) == null
 					|| dimentionItemCount.getItemsInDimentionAtValue().get(dimention).isEmpty()) {
-				plugin.debugInfo("no " + dimention + " values recorded");
+				MagicDoorsPlugin.getPlugin().debugInfo("no " + dimention + " values recorded");
 				return;
 			}
 
@@ -317,7 +307,7 @@ public class RootDoorListener implements Listener {
 
 			if (!dimentionItemCount.getItemsInDimentionAtValue().get(dimention).containsKey(coordValue)
 					|| dimentionItemCount.getItemsInDimentionAtValue().get(dimention).get(coordValue).isEmpty()) {
-				plugin.debugInfo("no matching " + dimention + " value");
+				MagicDoorsPlugin.getPlugin().debugInfo("no matching " + dimention + " value");
 				return;
 			} else {
 
@@ -341,13 +331,13 @@ public class RootDoorListener implements Listener {
 		}
 
 		if (exactMatches == null || exactMatches.isEmpty()) {
-			plugin.debugWarning("No match was found but we made it all the way through processing");
+			MagicDoorsPlugin.getPlugin().debugWarning("No match was found but we made it all the way through processing");
 			return;
 		}
 
 		int index = 0;
 		if (exactMatches.size() > 1) {
-			plugin.info("There was more than one match found after processing");
+			MagicDoorsPlugin.getPlugin().info("There was more than one match found after processing");
 			index = random.nextInt(exactMatches.size());
 		}
 
@@ -356,18 +346,18 @@ public class RootDoorListener implements Listener {
 		initMagicDoorRepo();
 
 		if (magicDoorRepo == null) {
-			plugin.debugWarning("Failed to load magic-doors repo.");
+			MagicDoorsPlugin.getPlugin().debugWarning("Failed to load magic-doors repo.");
 			return;
 		}
 
 		if (!magicDoorRepo.getMap().containsKey(match)) {
-			plugin.debugWarning("Failed to load door from magic-doors repo.");
+			MagicDoorsPlugin.getPlugin().debugWarning("Failed to load door from magic-doors repo.");
 			return;
 		}
 
 		MagicDoor magicDoor = magicDoorRepo.getMap().get(match);
 		if (magicDoor == null) {
-			plugin.debugWarning("Failed to load door from magic-doors repo.");
+			MagicDoorsPlugin.getPlugin().debugWarning("Failed to load door from magic-doors repo.");
 			return;
 		}
 		
@@ -376,7 +366,7 @@ public class RootDoorListener implements Listener {
 					
 			meta.setDisplayName(itemInHand.getItemMeta().getDisplayName() + "-" + PARENT_ID_EQUALS + magicDoor.getId());
 			itemInHand.setItemMeta(meta);
-			event.getPlayer().sendMessage(ChatColor.GREEN + String.format(plugin.getLocalizedMessage("magic.doors.root.door.copy.imprinted", event.getPlayer()), getRootDoorCopyRecipe().getName()));
+			event.getPlayer().sendMessage(ChatColor.GREEN + String.format(MagicDoorsPlugin.getPlugin().getLocalizedMessage("magic.doors.root.door.copy.imprinted", event.getPlayer()), getRootDoorCopyRecipe().getName()));
 			return;
 		}
 		
@@ -391,14 +381,14 @@ public class RootDoorListener implements Listener {
 					String keyName = plainKeyMeta.getDisplayName() + " ["+magicDoor.getId()+"]";
 					plainKeyMeta.setDisplayName(keyName);
 					itemInHand.setItemMeta(plainKeyMeta);
-					event.getPlayer().sendMessage(ChatColor.GREEN + String.format(plugin.getLocalizedMessage("magic.doors.key.imprinted", event.getPlayer()), keyName));
+					event.getPlayer().sendMessage(ChatColor.GREEN + String.format(MagicDoorsPlugin.getPlugin().getLocalizedMessage("magic.doors.key.imprinted", event.getPlayer()), keyName));
 					return;
 				}
 			}
 			
 			if (magicDoor.getChildren() == null || magicDoor.getChildren().isEmpty()) {
 				// This is a magic door with no children
-				event.getPlayer().sendMessage(ChatColor.RED + String.format(plugin.getLocalizedMessage("magic.doors.root.has.no.children", event.getPlayer()), magicDoor.getId()));
+				event.getPlayer().sendMessage(ChatColor.RED + String.format(MagicDoorsPlugin.getPlugin().getLocalizedMessage("magic.doors.root.has.no.children", event.getPlayer()), magicDoor.getId()));
 				return;
 			}
 		}
@@ -411,7 +401,7 @@ public class RootDoorListener implements Listener {
 				if(isSkeletonKey && magicDoor.getOwnerName().equals(event.getPlayer().getName())){
 					//this is the current player's door and they are using their skeleton key
 				}else{
-					event.getPlayer().sendMessage(ChatColor.RED + String.format(plugin.getLocalizedMessage("magic.doors.named.key.required", event.getPlayer()), magicDoor.getId()));
+					event.getPlayer().sendMessage(ChatColor.RED + String.format(MagicDoorsPlugin.getPlugin().getLocalizedMessage("magic.doors.named.key.required", event.getPlayer()), magicDoor.getId()));
 					return;
 				}
 			}
@@ -422,14 +412,14 @@ public class RootDoorListener implements Listener {
 			MagicDoor childDoor = magicDoorRepo.getMap().get(childId);
 
 			if (childDoor == null) {
-				event.getPlayer().sendMessage(ChatColor.RED + new MessageFormat(plugin.getLocalizedMessage("magic.doors.failed.to.find.child.door.number", event.getPlayer())).format(new Object[]{(childDoorNumber + 1)+"", magicDoor.getChildren().size()+""}));
+				event.getPlayer().sendMessage(ChatColor.RED + new MessageFormat(MagicDoorsPlugin.getPlugin().getLocalizedMessage("magic.doors.failed.to.find.child.door.number", event.getPlayer())).format(new Object[]{(childDoorNumber + 1)+"", magicDoor.getChildren().size()+""}));
 				return;
 			}
-			World world = plugin.getServer().getWorld(childDoor.getWorld());
+			World world = MagicDoorsPlugin.getPlugin().getServer().getWorld(childDoor.getWorld());
 
 			if (world == null) {
 
-				event.getPlayer().sendMessage(ChatColor.RED + new MessageFormat(plugin.getLocalizedMessage("magic.doors.failed.to.find.world", event.getPlayer())).format(new Object[]{childDoor.getWorld()}));
+				event.getPlayer().sendMessage(ChatColor.RED + new MessageFormat(MagicDoorsPlugin.getPlugin().getLocalizedMessage("magic.doors.failed.to.find.world", event.getPlayer())).format(new Object[]{childDoor.getWorld()}));
 				return;
 			}
 
@@ -437,7 +427,7 @@ public class RootDoorListener implements Listener {
 					childDoor.getPlayerZ() + 0.0);
 			event.getPlayer().teleport(destination);
 			
-			event.getPlayer().sendMessage(new MessageFormat(plugin.getLocalizedMessage("magic.doors.you.have.been.teleported.to.child", event.getPlayer())).format(new Object[]{(childDoorNumber+1)+"",magicDoor.getId()}));
+			event.getPlayer().sendMessage(new MessageFormat(MagicDoorsPlugin.getPlugin().getLocalizedMessage("magic.doors.you.have.been.teleported.to.child", event.getPlayer())).format(new Object[]{(childDoorNumber+1)+"",magicDoor.getId()}));
 		} else if (magicDoor.getParentId() != null && isKey) {
 			// this is a child, teleport to parent
 
@@ -445,7 +435,7 @@ public class RootDoorListener implements Listener {
 
 			if (parentDoor == null) {
 				event.getPlayer()
-						.sendMessage(ChatColor.RED + String.format(plugin.getLocalizedMessage("magic.doors.failed.to.find.parent.door.id", event.getPlayer()),magicDoor.getParentId()));
+						.sendMessage(ChatColor.RED + String.format(MagicDoorsPlugin.getPlugin().getLocalizedMessage("magic.doors.failed.to.find.parent.door.id", event.getPlayer()),magicDoor.getParentId()));
 				return;
 			}
 			
@@ -453,16 +443,16 @@ public class RootDoorListener implements Listener {
 				if(isSkeletonKey && parentDoor.getOwnerName().equals(event.getPlayer().getName())){
 					//this is the current player's door and they are using their skeleton key
 				}else{
-					event.getPlayer().sendMessage(ChatColor.RED + String.format(plugin.getLocalizedMessage("magic.doors.named.key.required", event.getPlayer()), parentDoor.getId()));
+					event.getPlayer().sendMessage(ChatColor.RED + String.format(MagicDoorsPlugin.getPlugin().getLocalizedMessage("magic.doors.named.key.required", event.getPlayer()), parentDoor.getId()));
 					return;
 				}
 				
 			}
 			
-			World world = plugin.getServer().getWorld(parentDoor.getWorld());
+			World world = MagicDoorsPlugin.getPlugin().getServer().getWorld(parentDoor.getWorld());
 
 			if (world == null) {
-				event.getPlayer().sendMessage(ChatColor.RED + new MessageFormat(plugin.getLocalizedMessage("magic.doors.failed.to.find.world", event.getPlayer())).format(new Object[]{parentDoor.getWorld()}));
+				event.getPlayer().sendMessage(ChatColor.RED + new MessageFormat(MagicDoorsPlugin.getPlugin().getLocalizedMessage("magic.doors.failed.to.find.world", event.getPlayer())).format(new Object[]{parentDoor.getWorld()}));
 				return;
 			}
 
@@ -472,7 +462,7 @@ public class RootDoorListener implements Listener {
 			
 			//magic.doors.you.have.been.teleported.to.root
 			event.getPlayer().sendMessage(
-					new MessageFormat(plugin.getLocalizedMessage("magic.doors.you.have.been.teleported.to.root", event.getPlayer())).format(new Object[]{magicDoor.getParentId()}) );
+					new MessageFormat(MagicDoorsPlugin.getPlugin().getLocalizedMessage("magic.doors.you.have.been.teleported.to.root", event.getPlayer())).format(new Object[]{magicDoor.getParentId()}) );
 		}
 	}
 	
@@ -483,7 +473,7 @@ public class RootDoorListener implements Listener {
 	
 	private void initMagicDoorRepo(){
 		if(magicDoorRepo == null){
-			magicDoorRepo = plugin.getTypeData(DATA_KEY_MAGIC_DOORS, MagicDoorRepo.class);
+			magicDoorRepo = MagicDoorsPlugin.getPlugin().getTypeData(DATA_KEY_MAGIC_DOORS, MagicDoorRepo.class);
 
 			if(magicDoorRepo == null || magicDoorRepo.getMap() == null){
 				magicDoorRepo = new MagicDoorRepo();
@@ -494,12 +484,12 @@ public class RootDoorListener implements Listener {
 	}
 	
 	private void updateMagicDoorRepo(){
-		plugin.setData(DATA_KEY_MAGIC_DOORS, magicDoorRepo);
+		MagicDoorsPlugin.getPlugin().setData(DATA_KEY_MAGIC_DOORS, magicDoorRepo);
 	}
 	
 	private void initDimentionItemCount(){
 		if (dimentionItemCount == null) {
-			dimentionItemCount = plugin.getTypeData(DATA_KEY_MAGIC_DOOR_DIMENTION_MAP, DimentionItemCount.class);
+			dimentionItemCount = MagicDoorsPlugin.getPlugin().getTypeData(DATA_KEY_MAGIC_DOOR_DIMENTION_MAP, DimentionItemCount.class);
 			if(dimentionItemCount == null || dimentionItemCount.getItemsInDimentionAtValue() == null){
 				dimentionItemCount = new DimentionItemCount();
 				dimentionItemCount.setItemsInDimentionAtValue(new HashMap<String, Map<Integer, Set<String>>>());
@@ -509,7 +499,7 @@ public class RootDoorListener implements Listener {
 	}
 	
 	private void updateDimentionItemCount(){
-		plugin.setData(DATA_KEY_MAGIC_DOOR_DIMENTION_MAP, dimentionItemCount, true);
+		MagicDoorsPlugin.getPlugin().setData(DATA_KEY_MAGIC_DOOR_DIMENTION_MAP, dimentionItemCount, true);
 	}
 	
 	private List<String> getDimentionList(){
@@ -543,7 +533,7 @@ public class RootDoorListener implements Listener {
 			updateDimentionItemCount();
 			updateMagicDoorRepo();
 		} catch (Exception e) {
-			plugin.warning("Unexpected error while saving door: " + e.getMessage());
+			MagicDoorsPlugin.getPlugin().warning("Unexpected error while saving door: " + e.getMessage());
 			return false;
 			
 		}
@@ -567,18 +557,18 @@ public class RootDoorListener implements Listener {
 		String doorId = null;
 		
 		if(doorPrefixes == null || doorPrefixes.isEmpty()){
-			plugin.debugWarning("doorPrefixes was null or empty");
+			MagicDoorsPlugin.getPlugin().debugWarning("doorPrefixes was null or empty");
 		}else{
 			doorId = doorPrefixes.get(random.nextInt(doorPrefixes.size()));
-			plugin.debugInfo("prefix chosen: " + doorId);
+			MagicDoorsPlugin.getPlugin().debugInfo("prefix chosen: " + doorId);
 		}
 		
 		if(doorSuffixes == null || doorSuffixes.isEmpty()){
-			plugin.debugWarning("doorSuffixes was null or empty");
+			MagicDoorsPlugin.getPlugin().debugWarning("doorSuffixes was null or empty");
 		}else{
 			String suffix = doorSuffixes.get(random.nextInt(doorSuffixes.size()));
 			
-			plugin.debugInfo("suffix chosen: " + doorId);
+			MagicDoorsPlugin.getPlugin().debugInfo("suffix chosen: " + doorId);
 			
 			if(doorId == null || doorId.isEmpty()){
 				doorId = suffix;
@@ -588,7 +578,7 @@ public class RootDoorListener implements Listener {
 		}
 		
 		if(doorId != null && !doorId.isEmpty()){
-			plugin.debugInfo("door id generated: " + doorId);
+			MagicDoorsPlugin.getPlugin().debugInfo("door id generated: " + doorId);
 		}
 		
 		return doorId;

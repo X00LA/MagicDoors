@@ -1,27 +1,14 @@
 package com.blocktyper.magicdoors;
 
-import java.util.Random;
-
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
 
-import com.blocktyper.plugin.BlockTyperPlugin;
 import com.blocktyper.recipes.IRecipe;
 
-/*
- * magic.doors.door=Magische Tür
-magic.doors.key=Magie Türschlüssel
-block.typer.loading.recipes=Laden Rezepte
- */
-
 public class KeyPlaceListener implements Listener {
-
-	private final BlockTyperPlugin plugin;
-
-	Random random = new Random();
 
 	private IRecipe doorKeyRecipe;
 
@@ -33,29 +20,29 @@ public class KeyPlaceListener implements Listener {
 	}
 
 	private IRecipe getRecipeFromKey(String key) {
-		String itemKey = plugin.config().getConfig().getString(key);
+		String itemKey = MagicDoorsPlugin.getPlugin().config().getConfig().getString(key);
 
-		plugin.debugInfo("loading recipe for " + key + ": '" + itemKey + "'");
-		IRecipe recipe = plugin.recipeRegistrar().getRecipeFromKey(itemKey);
+		MagicDoorsPlugin.getPlugin().debugInfo("loading recipe for " + key + ": '" + itemKey + "'");
+		IRecipe recipe = MagicDoorsPlugin.getPlugin().recipeRegistrar().getRecipeFromKey(itemKey);
 		if (recipe == null) {
-			plugin.warning("recipe '" + itemKey + "' was not found");
+			MagicDoorsPlugin.getPlugin().warning("recipe '" + itemKey + "' was not found");
 		}
 		return recipe;
 
 	}
 
 	public KeyPlaceListener() {
-		plugin = BlockTyperPlugin.plugin.get("MagicDoors");
+
 	}
 
 	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = false)
 	public void onBlockPlace(BlockPlaceEvent event) {
 		try {
-			plugin.debugInfo("BlockPlaceEvent - Material " + event.getBlock().getType().name());
+			MagicDoorsPlugin.getPlugin().debugInfo("BlockPlaceEvent - Material " + event.getBlock().getType().name());
 
 			// if there is no root door recipe defined, do not continue
 			if (getDoorKeyRecipe() == null) {
-				plugin.debugWarning("No magic door key recipe.");
+				MagicDoorsPlugin.getPlugin().debugWarning("No magic door key recipe.");
 				return;
 			}
 
@@ -63,20 +50,20 @@ public class KeyPlaceListener implements Listener {
 
 			// if player is not holding a item, do not continue
 			if (itemInHand == null) {
-				plugin.debugWarning("Not holding an item");
+				MagicDoorsPlugin.getPlugin().debugWarning("Not holding an item");
 				return;
 			}
 
 			// if player is not holding a magic door key, do not continue
 			if (!itemInHand.getType().equals(getDoorKeyRecipe().getOutput())
 					&& !itemInHand.getType().equals(getDoorKeyRecipe().getOutput())) {
-				plugin.debugWarning("Not holding a magic door key");
+				MagicDoorsPlugin.getPlugin().debugWarning("Not holding a magic door key");
 				return;
 			}
 
 			// if the item does not have a display name, do not continue
 			if (itemInHand.getItemMeta() == null || itemInHand.getItemMeta().getDisplayName() == null) {
-				plugin.debugWarning("Not holding key with a name.");
+				MagicDoorsPlugin.getPlugin().debugWarning("Not holding key with a name.");
 				return;
 			}
 
@@ -85,15 +72,16 @@ public class KeyPlaceListener implements Listener {
 			// if the item name does not equal the name of the current Root Door
 			// or Root Door Copy, do not continue
 			if (!itemName.equals(getDoorKeyRecipe().getName())) {
-				plugin.debugWarning("Not holding door key with the magic door key name: '" + itemName + "' != '"
-						+ getDoorKeyRecipe().getName() + "'");
+				MagicDoorsPlugin.getPlugin().debugWarning("Not holding door key with the magic door key name: '"
+						+ itemName + "' != '" + getDoorKeyRecipe().getName() + "'");
 				return;
 			}
 
 			event.setCancelled(true);
 
 		} catch (Exception e) {
-			plugin.warning("Unexpected error in 'RootDoorListener.onBlockPlace'. Message: " + e.getMessage());
+			MagicDoorsPlugin.getPlugin()
+					.warning("Unexpected error in 'RootDoorListener.onBlockPlace'. Message: " + e.getMessage());
 		}
 
 	}
