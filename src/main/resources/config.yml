@@ -24,6 +24,8 @@ magic.doors.recipe.name.skeleton.key: skeleton-key
 
 
 ############## RECIPES ############
+recipes-settings.continuous-translation: true
+
 recipes:
   - root-door
   - owned-root-door
@@ -38,7 +40,14 @@ recipes:
 
 
 ################## BEGIN Root Door ############
-recipe.root-door.name: √Root
+recipe.root-door.name: √Root Door
+recipe.root-door.locales:
+  - de
+  - es
+  - fr
+recipe.root-door.de.name: √Haupttür
+recipe.root-door.es.name: √Puerta de raíz
+recipe.root-door.fr.name: √Porte de racine
 recipe.root-door.rows: 
   - DDD
   - DID
@@ -57,7 +66,14 @@ recipe.root-door.listeners:
   
   
 ################## BEGIN Owned Root Door ############
-recipe.owned-root-door.name: √Owned Root
+recipe.owned-root-door.name: √Owned Root Door
+recipe.owned-root-door.locales:
+  - de
+  - es
+  - fr
+recipe.owned-root-door.de.name: √Eigene Haupttür
+recipe.owned-root-door.es.name: √Mi Puerta de raíz
+recipe.owned-root-door.fr.name: √Ma Porte de racine
 recipe.owned-root-door.rows: 
   - DED
   - DID
@@ -72,7 +88,14 @@ recipe.owned-root-door.output: IRON_DOOR
 
 
 ################## BEGIN ROOT DOOR COPY #################
-recipe.root-door-copy.name: ^RootDoorCopy
+recipe.root-door-copy.name: √Root Door Copy
+recipe.root-door-copy.locales:
+  - de
+  - es
+  - fr
+recipe.root-door-copy.de.name: √Haupttür Kopie
+recipe.root-door-copy.es.name: √Puerta de raíz Copia
+recipe.root-door-copy.fr.name: √Porte de racine Copie
 recipe.root-door-copy.rows: 
   - OEO
   - ODO
@@ -83,8 +106,8 @@ recipe.root-door-copy.mats:
   - W=WATER_BUCKET
   - D=IRON_DOOR
 recipe.root-door-copy.output: IRON_DOOR
-recipe.root-door-copy.item.starts.with: 
-  - 4=√Root
+recipe.root-door-copy.item-has-nbt-key: 
+  - 4=root-door
 recipe.root-door-copy.keep: 
   - NYN
   - NYN
@@ -96,7 +119,14 @@ recipe.root-door-copy.keep:
 
 
 ############ BEGIN Door Key ##########
-recipe.door-key.name: ^DoorKey
+recipe.door-key.name: Door Key
+recipe.door-key.locales:
+  - de
+  - es
+  - fr
+recipe.door-key.de.name: Türschlüssel
+recipe.door-key.es.name: Llave de la puerta
+recipe.door-key.fr.name: Clé de la porte
 recipe.door-key.rows: 
   - AYA
   - ADA
@@ -106,10 +136,9 @@ recipe.door-key.mats:
   - A=AIR
   - D=IRON_DOOR
   - L=LAVA_BUCKET
-recipe.door-key.item.starts.with: 
-  - 4=^RootDoorCopy
+recipe.door-key.item-has-nbt-key: 
+  - 4=root-door-copy
 recipe.door-key.output: YELLOW_FLOWER
-recipe.door-key.item.starts.with: []
 recipe.door-key.keep: 
   - NNN
   - NYN
@@ -122,7 +151,14 @@ recipe.door-key.listeners:
 
 
 ############ BEGIN Skeleton Key ##########
-recipe.skeleton-key.name: ^SkeletonKey
+recipe.skeleton-key.name: Skeleton Key
+recipe.skeleton-key.locales:
+  - de
+  - es
+  - fr
+recipe.skeleton-key.de.name: Skelettschlüssel
+recipe.skeleton-key.es.name: Llave maestra
+recipe.skeleton-key.fr.name: Passe-partout
 recipe.skeleton-key.rows: 
   - ABA
   - ADA
@@ -132,10 +168,9 @@ recipe.skeleton-key.mats:
   - A=AIR
   - D=IRON_DOOR
   - L=LAVA_BUCKET
-recipe.skeleton-key.item.starts.with: 
-  - 4=^RootDoorCopy
+recipe.skeleton-key.item-has-nbt-key: 
+  - 4=root-door-copy
 recipe.skeleton-key.output: BONE
-recipe.skeleton-key.item.starts.with: []
 recipe.skeleton-key.keep: 
   - NNN
   - NYN
@@ -148,8 +183,20 @@ recipe.skeleton-key.keep:
 
 
 
-
-
+messages.magic.doors.door.de: Magische Tür
+messages.magic.doors.key.de: Magischer Türschlüssel
+messages.magic.doors.you.placed.a.magic.door.de: Du hast eine magische Tür mit der ID %s, plaziert.
+messages.block.typer.loading.recipes.de: Rezepte werden geladen...
+messages.magic.doors.attempted.to.place.orphan.door.de: Du hast versucht, eine verwaiste Tür zu setzen.
+messages.magic.doors.root.door.copy.imprinted.de: %s wurde geprägt und kann nun plaziert werden.
+messages.magic.doors.key.imprinted.de: %s wurde geprägt.
+messages.magic.doors.named.key.required.de: Um diese Tür verwenden zu können, ist ein magischer Türschlüssel mit dem Namen [%s] erforderlich.
+messages.magic.doors.root.has.no.children.de: %s hat noch keine untergeordnete Tür.
+messages.magic.doors.failed.to.find.child.door.number.de: Fehler beim Finden einer untergeordneten Tür #{0} von {1}.
+messages.magic.doors.failed.to.find.world.de: Die Welt, {0}, konnte nicht gefunden werden.
+messages.magic.doors.you.have.been.teleported.to.child.de: Du wurdest zur Tür #{0} der Türgruppe {1} teleportiert.
+messages.magic.doors.failed.to.find.parent.door.id.de: Es konnte keine Tür mit der Haupt-ID, {0}, gefunden werden.
+messages.magic.doors.you.have.been.teleported.to.root.de: Du wurdest zur Haupttür der Gruppe, {0}, teleportiert.
 
 
 
