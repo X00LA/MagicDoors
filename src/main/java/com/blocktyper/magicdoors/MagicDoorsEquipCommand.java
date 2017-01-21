@@ -15,6 +15,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import com.blocktyper.recipes.IRecipe;
+import static com.blocktyper.magicdoors.MagicDoorsPlugin.*;
 
 import net.md_5.bungee.api.ChatColor;
 
@@ -27,7 +28,7 @@ public class MagicDoorsEquipCommand implements CommandExecutor {
 	public MagicDoorsEquipCommand(MagicDoorsPlugin plugin) {
 		this.plugin = plugin;
 		plugin.getCommand(COMMAND_MD_EQUIP).setExecutor(this);
-		plugin.info("'/" + COMMAND_MD_EQUIP + "' registered");
+		plugin.debugInfo("'/" + COMMAND_MD_EQUIP + "' registered");
 	}
 
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -41,9 +42,9 @@ public class MagicDoorsEquipCommand implements CommandExecutor {
 			if (!player.isOp())
 				return false;
 
-			Set<Material> distinctMaterials = getDistinctMatsForRecipes(MagicDoorsPlugin.RECIPE_NAME_DOOR_KEY,
-					MagicDoorsPlugin.RECIPE_NAME_ROOT_DOOR_COPY, MagicDoorsPlugin.RECIPE_NAME_ROOT_DOOR,
-					MagicDoorsPlugin.RECIPE_NAME_OWNED_ROOT_DOOR, MagicDoorsPlugin.RECIPE_NAME_SKELETON_KEY);
+			Set<Material> distinctMaterials = getDistinctMatsForRecipes(doorKeyRecipe(),
+					rootDoorCopyRecipe(), rootDoorCopyRecipe(),
+					ownedRootDoorRecipe(), skeletonKeyRecipe());
 
 			if (distinctMaterials == null || distinctMaterials.isEmpty()) {
 				plugin.warning("distinctMaterials was null");
@@ -95,9 +96,8 @@ public class MagicDoorsEquipCommand implements CommandExecutor {
 		return distinctMaterials;
 	}
 
-	private Set<Material> getDistinctMaterialsFromRecipeFromName(String recipeName) {
-		String itemKey = plugin.config().getConfig().getString(recipeName);
-		IRecipe recipe = plugin.recipeRegistrar().getRecipeFromKey(itemKey);
+	private Set<Material> getDistinctMaterialsFromRecipeFromName(String recipeKey) {
+		IRecipe recipe = plugin.recipeRegistrar().getRecipeFromKey(recipeKey);
 		return getDistinctMaterialsForRecipe(recipe);
 	}
 
