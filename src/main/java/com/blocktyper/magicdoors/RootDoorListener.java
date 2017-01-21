@@ -222,7 +222,12 @@ public class RootDoorListener implements Listener {
 	private void interactWithDoor(Cancellable event, HumanEntity player, ItemStack itemInHand, Block block) {
 
 		if (itemInHand == null) {
-			MagicDoorsPlugin.getPlugin().debugWarning("Not holding an item");
+			MagicDoorsPlugin.getPlugin().debugInfo("Not holding an item");
+			return;
+		}
+		
+		if (block == null) {
+			MagicDoorsPlugin.getPlugin().debugInfo("Block was null");
 			return;
 		}
 
@@ -237,9 +242,9 @@ public class RootDoorListener implements Listener {
 		if (!nbtRecipeKey.equals(rootDoorCopyRecipe()) && !nbtRecipeKey.equals(doorKeyRecipe())
 				&& !nbtRecipeKey.equals(skeletonKeyRecipe())) {
 			String notHoldingMessage = "Not holding an item which has the recipe key: ";
-			MagicDoorsPlugin.getPlugin().debugWarning(notHoldingMessage + rootDoorCopyRecipe());
-			MagicDoorsPlugin.getPlugin().debugWarning(notHoldingMessage + doorKeyRecipe());
-			MagicDoorsPlugin.getPlugin().debugWarning(notHoldingMessage + skeletonKeyRecipe());
+			MagicDoorsPlugin.getPlugin().debugInfo(notHoldingMessage + rootDoorCopyRecipe());
+			MagicDoorsPlugin.getPlugin().debugInfo(notHoldingMessage + doorKeyRecipe());
+			MagicDoorsPlugin.getPlugin().debugInfo(notHoldingMessage + skeletonKeyRecipe());
 			return;
 		}
 
