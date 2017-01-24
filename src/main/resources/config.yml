@@ -183,20 +183,20 @@ recipe.skeleton-key.keep:
 
 
 
-messages.magic.doors.door.de: Magische Tür
-messages.magic.doors.key.de: Magischer Türschlüssel
-messages.magic.doors.you.placed.a.magic.door.de: Du hast eine magische Tür mit der ID %s, plaziert.
-messages.block.typer.loading.recipes.de: Rezepte werden geladen...
-messages.magic.doors.attempted.to.place.orphan.door.de: Du hast versucht, eine verwaiste Tür zu setzen.
-messages.magic.doors.root.door.copy.imprinted.de: %s wurde geprägt und kann nun plaziert werden.
-messages.magic.doors.key.imprinted.de: %s wurde geprägt.
-messages.magic.doors.named.key.required.de: Um diese Tür verwenden zu können, ist ein magischer Türschlüssel mit dem Namen [%s] erforderlich.
-messages.magic.doors.root.has.no.children.de: %s hat noch keine untergeordnete Tür.
-messages.magic.doors.failed.to.find.child.door.number.de: Fehler beim Finden einer untergeordneten Tür #{0} von {1}.
-messages.magic.doors.failed.to.find.world.de: Die Welt, {0}, konnte nicht gefunden werden.
-messages.magic.doors.you.have.been.teleported.to.child.de: Du wurdest zur Tür #{0} der Türgruppe {1} teleportiert.
-messages.magic.doors.failed.to.find.parent.door.id.de: Es konnte keine Tür mit der Haupt-ID, {0}, gefunden werden.
-messages.magic.doors.you.have.been.teleported.to.root.de: Du wurdest zur Haupttür der Gruppe, {0}, teleportiert.
+messages.magic.doors.door.de=Magische Tür
+messages.magic.doors.key.de=Magischer Türschlüssel
+messages.magic.doors.you.placed.a.magic.door.de=§2Du hast eine magische Tür mit der ID %s, plaziert.
+messages.block.typer.loading.recipes.de=Rezepte werden geladen...
+messages.magic.doors.attempted.to.place.orphan.door.de=§4Du hast versucht, eine verwaiste Tür zu setzen.
+messages.magic.doors.root.door.copy.imprinted.de=§2%s wurde geprÃ¤gt und kann nun plaziert werden.
+messages.magic.doors.key.imprinted.de=§2%s wurde geprÃ¤gt.
+messages.magic.doors.named.key.required.de=§4Um diese Tür verwenden zu können, ist ein magischer Türschlüssel mit dem Namen [%s] erforderlich.
+messages.magic.doors.root.has.no.children.de=§2%s hat noch keine untergeordnete Tür.
+messages.magic.doors.failed.to.find.child.door.number.de=§2Fehler beim Finden einer untergeordneten Tür #{0} von {1}.
+messages.magic.doors.failed.to.find.world.de=§4Die Welt, {0}, konnte nicht gefunden werden.
+messages.magic.doors.you.have.been.teleported.to.child.de=§2Du wurdest zur Tür #{0} der Türgruppe {1} teleportiert.
+messages.magic.doors.failed.to.find.parent.door.id.de=§4Es konnte keine Tür mit der Haupt-ID, {0}, gefunden werden.
+messages.magic.doors.you.have.been.teleported.to.root.de=§2Du wurdest zur Haupttür der Gruppe, {0}, teleportiert.
 
 
 
